@@ -12,16 +12,19 @@ export default function StoreAbout() {
     }
   }, []);
 
+  const storeName = storeData?.name || "Our Store";
+  const storeDescription = storeData?.description || "Founded with a simple mission: to bring high-quality, curated products to customers who value both style and substance.";
+
   return (
     <StoreLayout>
       <div className="container mx-auto px-4 py-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-heading font-bold mb-6">About {storeData?.name || "Our Store"}</h1>
+          <h1 className="text-4xl font-heading font-bold mb-6">About {storeName}</h1>
 
           <div className="bg-card rounded-xl border border-border p-8 mb-8 shadow-sm">
             <h2 className="text-2xl font-heading font-semibold mb-4 text-primary">Our Story</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              {storeData?.description ? storeData.description : "Founded in 2024, our store began with a simple mission: to bring high-quality, curated products to customers who value both style and substance."}
+              {storeDescription}
             </p>
             {!storeData?.description && (
               <p className="text-muted-foreground leading-relaxed">
@@ -33,7 +36,7 @@ export default function StoreAbout() {
           <div className="bg-card rounded-xl border border-border p-8 mb-8 shadow-sm">
             <h2 className="text-2xl font-heading font-semibold mb-4 text-primary">Our Mission</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To empower customers with access to exceptional products while maintaining sustainable and ethical business practices. We're committed to transparency, quality, and customer satisfaction.
+              At {storeName}, our mission is to empower customers with access to exceptional products while maintaining sustainable and ethical business practices. We're committed to transparency, quality, and customer satisfaction.
             </p>
           </div>
 
@@ -41,9 +44,9 @@ export default function StoreAbout() {
             <h2 className="text-2xl font-heading font-semibold mb-6 text-primary">Our Team</h2>
             <div className="grid sm:grid-cols-3 gap-6">
               {[
-                { name: "John Doe", role: "Founder & CEO", emoji: "👨‍💼" },
-                { name: "Jane Smith", role: "Head of Design", emoji: "👩‍🎨" },
-                { name: "Alex Park", role: "Operations Lead", emoji: "👨‍💻" },
+                { name: storeData?.owner?.name || "The Founder", role: "Founder & CEO", emoji: "👨‍💼" },
+                { name: "Creative Team", role: "Design & Style", emoji: "👩‍🎨" },
+                { name: "Support Team", role: "Customer Happiness", emoji: "👨‍💻" },
               ].map((m) => (
                 <div key={m.name} className="text-center group">
                   <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-4xl mx-auto mb-3 group-hover:scale-110 transition-transform">{m.emoji}</div>

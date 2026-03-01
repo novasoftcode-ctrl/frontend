@@ -21,9 +21,12 @@ export default function DashboardSettings() {
     let updatedData = { ...storeData };
     if (savedStore) {
       const parsedStore = JSON.parse(savedStore);
-      updatedData.name = parsedStore.name;
-      updatedData.description = parsedStore.description;
-      if (parsedStore.email) updatedData.email = parsedStore.email;
+      updatedData.name = parsedStore.name || updatedData.name;
+      updatedData.description = parsedStore.description || updatedData.description;
+      updatedData.email = parsedStore.email || updatedData.email;
+    } else if (savedAccount) {
+      const parsedAccount = JSON.parse(savedAccount);
+      updatedData.email = parsedAccount.email || updatedData.email;
     }
     setStoreData(updatedData);
   }, []);

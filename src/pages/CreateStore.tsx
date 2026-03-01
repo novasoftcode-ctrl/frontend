@@ -131,6 +131,19 @@ export default function CreateStore() {
           throw new Error(data.message || "Failed to create store");
         }
 
+        // Save store data to localStorage for immediate use in Dashboard and Storefront
+        if (data.store) {
+          localStorage.setItem("vendor_store_data", JSON.stringify(data.store));
+          localStorage.setItem("vendor_store_name", data.store.name);
+          // Also update account data if it exists to keep everything in sync
+          const savedAccount = localStorage.getItem("user_account_data");
+          if (savedAccount) {
+            const parsedAccount = JSON.parse(savedAccount);
+            parsedAccount.hasStore = true;
+            localStorage.setItem("user_account_data", JSON.stringify(parsedAccount));
+          }
+        }
+
         toast({
           title: "Success",
           description: "Your store has been created!",

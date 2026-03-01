@@ -9,6 +9,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
+const menuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Products", url: "/dashboard/products", icon: Package },
+  { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
+  { title: "Customers", url: "/dashboard/customers", icon: Users },
+  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+];
+
+const adminMenuItems = [
+  { title: "Platform Overview", url: "/admin", icon: LayoutDashboard },
+  { title: "Store Management", url: "/admin#stores", icon: Store },
+  { title: "User Control", url: "/admin#users", icon: Users },
+  { title: "Revenue", url: "/admin#revenue", icon: BarChart3 },
+  { title: "Platform Settings", url: "/admin#settings", icon: Settings },
+];
+
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
