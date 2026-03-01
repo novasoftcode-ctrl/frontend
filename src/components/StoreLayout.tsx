@@ -28,7 +28,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     const storeDataStr = localStorage.getItem("vendor_store_data");
     if (storeDataStr) {
       const parsed = JSON.parse(storeDataStr);
-      if (parsed.logo) setStoreLogo(parsed.logo);
+      if (parsed.logoUrl) setStoreLogo(parsed.logoUrl);
       if (parsed.name) setStoreName(parsed.name);
     }
   }, []);

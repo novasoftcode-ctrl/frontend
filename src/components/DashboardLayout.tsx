@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3, Settings, Store, ChevronLeft, LogOut, Plus,
 } from "lucide-react";
@@ -36,6 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userName, setUserName] = useState("User");
   const [userInitial, setUserInitial] = useState("J");
   const [storeSlug, setStoreSlug] = useState("my-store");
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     const savedName = localStorage.getItem("vendor_store_name");
@@ -49,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const parsed = JSON.parse(storeDataStr);
       if (parsed.name) {
         setStoreName(parsed.name);
-        setStoreLogo(parsed.logo || null);
+        setStoreLogo(parsed.logoUrl || null);
         setUserInitial(parsed.name.charAt(0).toUpperCase());
         setStoreSlug(parsed.name.toLowerCase().replace(/\s+/g, '-'));
       }
@@ -110,34 +112,65 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-
-            <div className="mt-auto p-4 space-y-2 border-t border-border/50">
-              {!isAdmin && (
-                <Link to={`/store/${storeSlug}`} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group">
-                  <Store className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-bold">View Store</span>
-                </Link>
-              )}
-              <Link to="/" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all group">
-                <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                <span className="text-sm font-bold">Logout</span>
-              </Link>
-            </div>
           </SidebarContent>
         </Sidebar>
 
         <div className="flex-1 flex flex-col">
           <header className="h-16 flex items-center border-b border-border px-6 bg-white/80 backdrop-blur-md sticky top-0 z-40">
             <SidebarTrigger className="hover:bg-muted" />
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-4 relative">
               {isAdmin && (
                 <Button variant="ghost" size="sm" className="text-muted-foreground font-black text-[10px] tracking-tighter uppercase" asChild>
                   <Link to="/dashboard">Vendor Dashboard</Link>
                 </Button>
               )}
-              <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-primary-foreground text-sm font-black shadow-lg shadow-primary/20 cursor-pointer hover:rotate-3 transition-transform">
+
+              <div
+                className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-primary-foreground text-sm font-black shadow-lg shadow-primary/20 cursor-pointer hover:rotate-3 transition-transform"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+              >
                 {isAdmin ? "A" : userInitial}
               </div>
+
+              {/* Profile Dropdown */}
+              {showProfileMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  className="absolute right-0 top-full mt-2 w-48 bg-white border border-border rounded-xl shadow-xl p-2 z-50 overflow-hidden"
+                >
+                  <div className="px-3 py-2 border-b border-border/50 mb-1">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{isAdmin ? "Administrator" : "Vendor Account"}</p>
+                    <p className="text-sm font-black truncate">{isAdmin ? "Admin" : userName}</p>
+                  </div>
+
+                  {!isAdmin && (
+                    <Link
+                      to={`/store/${storeSlug}`}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group"
+                      onClick={() => setShowProfileMenu(false)}
+                      target="_blank"
+                    >
+                      <Store className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      View Store
+                    </Link>
+                  )}
+
+                  <Link
+                    to="/"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all group"
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                    Logout
+                  </Link>
+                </motion.div>
+              )}
+
+              {/* Overlay to close menu */}
+              {showProfileMenu && (
+                <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+              )}
             </div>
           </header>
           <main className="flex-1 p-8 bg-[#f8fafc] overflow-auto">{children}</main>

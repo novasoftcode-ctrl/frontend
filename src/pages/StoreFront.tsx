@@ -34,7 +34,7 @@ export default function StoreFront() {
     if (storeDataStr) {
       const parsed = JSON.parse(storeDataStr);
       if (parsed.name) setStoreName(parsed.name);
-      if (parsed.cover) setStoreCover(parsed.cover);
+      if (parsed.coverUrl) setStoreCover(parsed.coverUrl);
     }
 
     // Load products from localStorage
