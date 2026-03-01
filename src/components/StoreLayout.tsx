@@ -12,6 +12,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
   const location = useLocation();
   const navigate = useNavigate();
   const [storeName, setStoreName] = useState("My Store");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
 
   const storeNav = [
     { label: "Home", href: `/store/${slug}` },
@@ -21,8 +22,15 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
   ];
 
   useEffect(() => {
-    const saved = localStorage.getItem("vendor_store_name");
-    if (saved) setStoreName(saved);
+    const savedName = localStorage.getItem("vendor_store_name");
+    if (savedName) setStoreName(savedName);
+
+    const storeDataStr = localStorage.getItem("vendor_store_data");
+    if (storeDataStr) {
+      const parsed = JSON.parse(storeDataStr);
+      if (parsed.logo) setStoreLogo(parsed.logo);
+      if (parsed.name) setStoreName(parsed.name);
+    }
   }, []);
 
   const handleMonitorStore = () => {
@@ -42,8 +50,12 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto flex items-center justify-between h-18 px-4 py-2">
           <Link to={`/store/${slug}`} className="flex items-center gap-2.5 font-heading font-black text-xl hover:text-primary transition-colors">
-            <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20">
-              <Store className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
+              {storeLogo ? (
+                <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
+              ) : (
+                <Store className="w-5 h-5 text-primary-foreground" />
+              )}
             </div>
             <span className="truncate max-w-[150px]">{storeName}</span>
           </Link>

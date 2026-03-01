@@ -52,6 +52,13 @@ export default function Signup() {
       localStorage.setItem("prismzone_token", data.token);
       localStorage.setItem("prismzone_user", JSON.stringify(data.user));
 
+      // Store password for local "Monitor Store" validation
+      localStorage.setItem("user_account_data", JSON.stringify({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      }));
+
       toast({
         title: "Account Created",
         description: "Welcome to PrismZone! Now let's create your store.",

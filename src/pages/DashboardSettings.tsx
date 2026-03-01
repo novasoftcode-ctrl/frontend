@@ -78,28 +78,29 @@ export default function DashboardSettings() {
                 <Label>Store Name</Label>
                 <Input
                   value={storeData.name}
-                  onChange={(e) => setStoreData({ ...storeData, name: e.target.value })}
-                  className="mt-1.5"
+                  readOnly
+                  className="mt-1.5 bg-muted cursor-not-allowed font-bold"
                 />
+                <p className="text-[10px] text-muted-foreground mt-1">Store name is linked to your URL and cannot be changed.</p>
               </div>
               <div>
                 <Label>Store Description</Label>
                 <textarea
-                  className="mt-1.5 w-full rounded-lg border border-border bg-background p-3 text-sm min-h-[100px]"
+                  className="mt-1.5 w-full rounded-lg border border-border bg-background p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary outline-none"
                   value={storeData.description}
                   onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
                 />
               </div>
               <div>
                 <Label>Store URL</Label>
-                <Input value={`https://prism-zone.netlify.app/store/${storeData.name.toLowerCase().replace(/\s+/g, '-')}`} readOnly className="mt-1.5 bg-muted font-mono text-xs" />
+                <Input value={`https://prism-zone.netlify.app/store/${storeData.name.toLowerCase().replace(/\s+/g, '-')}`} readOnly className="mt-1.5 bg-muted font-mono text-xs cursor-not-allowed" />
               </div>
               <div>
                 <Label>Contact Email</Label>
                 <Input
                   value={storeData.email}
                   onChange={(e) => setStoreData({ ...storeData, email: e.target.value })}
-                  className="mt-1.5"
+                  className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
                 />
               </div>
               <Button onClick={handleSave} className="gradient-bg border-0 text-primary-foreground">Save Changes</Button>

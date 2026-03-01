@@ -23,11 +23,19 @@ const fadeUp = {
 export default function StoreFront() {
   const { slug } = useParams();
   const [storeName, setStoreName] = useState("My Store");
+  const [storeCover, setStoreCover] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]); // State for products
 
   useEffect(() => {
     const saved = localStorage.getItem("vendor_store_name");
     if (saved) setStoreName(saved);
+
+    const storeDataStr = localStorage.getItem("vendor_store_data");
+    if (storeDataStr) {
+      const parsed = JSON.parse(storeDataStr);
+      if (parsed.name) setStoreName(parsed.name);
+      if (parsed.cover) setStoreCover(parsed.cover);
+    }
 
     // Load products from localStorage
     const savedProducts = localStorage.getItem("vendor_products");
@@ -54,8 +62,15 @@ export default function StoreFront() {
   return (
     <StoreLayout>
       {/* Hero Banner */}
-      <section className="gradient-bg py-20 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/5 pointer-events-none" />
+      <section
+        className={`py-20 text-center relative overflow-hidden ${!storeCover ? 'gradient-bg' : ''}`}
+        style={storeCover ? {
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${storeCover})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : {}}
+      >
+        {!storeCover && <div className="absolute inset-0 bg-black/5 pointer-events-none" />}
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}

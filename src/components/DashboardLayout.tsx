@@ -32,6 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
   const [storeName, setStoreName] = useState("My Store");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [userName, setUserName] = useState("User");
   const [userInitial, setUserInitial] = useState("J");
   const [storeSlug, setStoreSlug] = useState("my-store");
@@ -48,6 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const parsed = JSON.parse(storeDataStr);
       if (parsed.name) {
         setStoreName(parsed.name);
+        setStoreLogo(parsed.logo || null);
         setUserInitial(parsed.name.charAt(0).toUpperCase());
         setStoreSlug(parsed.name.toLowerCase().replace(/\s+/g, '-'));
       }
@@ -67,8 +69,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Sidebar collapsible="icon">
           <SidebarContent>
             <div className="p-4 flex items-center gap-3 border-b border-border/50 mb-2">
-              <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-                <Store className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 overflow-hidden">
+                {storeLogo ? (
+                  <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
+                ) : (
+                  <Store className="w-6 h-6 text-primary-foreground" />
+                )}
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-heading font-black text-sm truncate uppercase tracking-tighter">{isAdmin ? "PrismZone" : storeName}</span>

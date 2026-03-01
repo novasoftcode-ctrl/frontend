@@ -33,6 +33,10 @@ export default function Login() {
       localStorage.setItem("prismzone_token", data.token);
       localStorage.setItem("prismzone_user", JSON.stringify(data.user));
 
+      // Store password for local "Monitor Store" validation
+      const accountData = JSON.parse(localStorage.getItem("user_account_data") || "{}");
+      localStorage.setItem("user_account_data", JSON.stringify({ ...accountData, password: password }));
+
       toast({
         title: "Login Successful",
         description: "Welcome back!",
