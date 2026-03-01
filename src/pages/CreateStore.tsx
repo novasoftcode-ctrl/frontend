@@ -117,7 +117,7 @@ export default function CreateStore() {
         if (logoFileRef.current) storeFormData.append("logo", logoFileRef.current);
         if (coverFileRef.current) storeFormData.append("cover", coverFileRef.current);
 
-        const response = await fetch("http://localhost:5000/api/store/create", {
+        const response = await fetch("https://backend-production-de8ef.up.railway.app/api/store/create", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
