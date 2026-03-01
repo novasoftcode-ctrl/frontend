@@ -79,11 +79,11 @@ const App = () => (
             <Route path="/dashboard/customers" element={<Customers />} />
             <Route path="/dashboard/analytics" element={<Analytics />} />
             <Route path="/dashboard/settings" element={<DashboardSettings />} />
-            <Route path="/store/my-store" element={<StoreFront />} />
-            <Route path="/store/my-store/products" element={<StoreProducts />} />
-            <Route path="/store/my-store/product/:id" element={<ProductDetail />} />
-            <Route path="/store/my-store/about" element={<StoreAbout />} />
-            <Route path="/store/my-store/contact" element={<StoreContact />} />
+            <Route path="/store/:slug" element={<StoreFront />} />
+            <Route path="/store/:slug/products" element={<StoreProducts />} />
+            <Route path="/store/:slug/product/:id" element={<ProductDetail />} />
+            <Route path="/store/:slug/about" element={<StoreAbout />} />
+            <Route path="/store/:slug/contact" element={<StoreContact />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />

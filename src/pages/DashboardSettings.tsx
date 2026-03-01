@@ -89,7 +89,7 @@ export default function DashboardSettings() {
               </div>
               <div>
                 <Label>Store URL</Label>
-                <Input value={`prismzone.com/store/${storeData.name.toLowerCase().replace(/\s+/g, '-')}`} readOnly className="mt-1.5 bg-muted" />
+                <Input value={`https://prism-zone.netlify.app/store/${storeData.name.toLowerCase().replace(/\s+/g, '-')}`} readOnly className="mt-1.5 bg-muted font-mono text-xs" />
               </div>
               <div>
                 <Label>Contact Email</Label>

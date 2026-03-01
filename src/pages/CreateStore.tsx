@@ -406,7 +406,8 @@ export default function CreateStore() {
                   size="icon"
                   className="hover:bg-primary/10 hover:text-primary transition-colors flex-shrink-0"
                   onClick={() => {
-                    const url = `https://prism-zone.netlify.app/store/${formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store'}`;
+                    const slug = formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store';
+                    const url = `https://prism-zone.netlify.app/store/${slug}`;
                     navigator.clipboard.writeText(url);
                     toast({ title: "Copied!", description: "Link copied to clipboard" });
                   }}
@@ -418,7 +419,7 @@ export default function CreateStore() {
                 <QrCode className="w-20 h-20 text-muted-foreground" />
               </div>
               <Button className="w-full h-12 gradient-bg border-0 text-primary-foreground font-black text-lg shadow-xl hover:shadow-primary/20 transition-all" asChild>
-                <Link to="/dashboard">Go to Dashboard <ArrowRight className="ml-2 w-5 h-5" /></Link>
+                <Link to="/dashboard">Go to Your Dashboard <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
             </div>
           )}

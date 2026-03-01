@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Store, Search, ShoppingCart, Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,18 +6,19 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import StoreFooter from "@/components/StoreFooter";
 
-const storeNav = [
-  { label: "Home", href: "/store/my-store" },
-  { label: "Products", href: "/store/my-store/products" },
-  { label: "About", href: "/store/my-store/about" },
-  { label: "Contact", href: "/store/my-store/contact" },
-];
-
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
+  const { slug } = useParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [storeName, setStoreName] = useState("My Store");
+
+  const storeNav = [
+    { label: "Home", href: `/store/${slug}` },
+    { label: "Products", href: `/store/${slug}/products` },
+    { label: "About", href: `/store/${slug}/about` },
+    { label: "Contact", href: `/store/${slug}/contact` },
+  ];
 
   useEffect(() => {
     const saved = localStorage.getItem("vendor_store_name");
@@ -40,7 +41,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto flex items-center justify-between h-18 px-4 py-2">
-          <Link to="/store/my-store" className="flex items-center gap-2.5 font-heading font-black text-xl hover:text-primary transition-colors">
+          <Link to={`/store/${slug}`} className="flex items-center gap-2.5 font-heading font-black text-xl hover:text-primary transition-colors">
             <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20">
               <Store className="w-5 h-5 text-primary-foreground" />
             </div>

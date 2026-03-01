@@ -1,5 +1,5 @@
 import StoreLayout from "@/components/StoreLayout";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ const fadeUp = {
 };
 
 export default function StoreFront() {
+  const { slug } = useParams();
   const [storeName, setStoreName] = useState("My Store");
   const [products, setProducts] = useState<any[]>([]); // State for products
 
@@ -77,7 +78,7 @@ export default function StoreFront() {
             transition={{ delay: 0.4 }}
           >
             <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold px-10 h-14 rounded-full text-lg shadow-xl shadow-black/10" asChild>
-              <Link to="/store/my-store/products">Shop Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+              <Link to={`/store/${slug}/products`}>Shop Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
             </Button>
           </motion.div>
         </div>
@@ -93,7 +94,7 @@ export default function StoreFront() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((c, i) => (
               <motion.div key={c.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
-                <Link to="/store/my-store/products" className="block bg-white rounded-2xl border border-border p-8 text-center hover-lift shadow-sm hover:shadow-md transition-all">
+                <Link to={`/store/${slug}/products`} className="block bg-white rounded-2xl border border-border p-8 text-center hover-lift shadow-sm hover:shadow-md transition-all">
                   <span className="text-5xl block mb-4">{c.emoji}</span>
                   <h3 className="font-heading font-bold text-lg mb-1">{c.name}</h3>
                   <p className="text-sm text-muted-foreground font-medium">{c.count} products</p>
@@ -114,7 +115,7 @@ export default function StoreFront() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {displayProducts.map((p, i) => ( // Added 'i' for custom delay
               <motion.div key={p.id} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i} className="group">
-                <Link to={`/store/my-store/product/${p.id}`} className="block"> {/* Wrapped product card in Link */}
+                <Link to={`/store/${slug}/product/${p.id}`} className="block"> {/* Wrapped product card in Link */}
                   <div className="relative aspect-square rounded-3xl overflow-hidden mb-6 bg-white shadow-sm border border-slate-100">
                     <img
                       src={p.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format"}
