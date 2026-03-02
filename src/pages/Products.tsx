@@ -3,19 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { Search, Plus, Grid3X3, List, MoreVertical, Edit, Trash2, Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-const products = [
-  { id: 1, name: "Classic Blue Dress", price: "$89.99", stock: 45, status: "Active", img: "👗" },
-  { id: 2, name: "Wireless Earbuds Pro", price: "$49.99", stock: 120, status: "Active", img: "🎧" },
-  { id: 3, name: "Leather Crossbody Bag", price: "$129.99", stock: 8, status: "Low Stock", img: "👜" },
-  { id: 4, name: "Running Sneakers", price: "$79.99", stock: 0, status: "Out of Stock", img: "👟" },
-  { id: 5, name: "Smartwatch Elite", price: "$199.99", stock: 33, status: "Active", img: "⌚" },
-  { id: 6, name: "Organic Face Cream", price: "$34.99", stock: 67, status: "Active", img: "🧴" },
-  { id: 7, name: "Cotton T-Shirt Pack", price: "$24.99", stock: 200, status: "Active", img: "👕" },
-  { id: 8, name: "Yoga Mat Premium", price: "$44.99", stock: 15, status: "Active", img: "🧘" },
-];
+import { useToast } from "@/components/ui/use-toast";
 
 const stockStatus: Record<string, string> = {
   Active: "bg-success/10 text-success",
@@ -25,6 +15,68 @@ const stockStatus: Record<string, string> = {
 
 export default function Products() {
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("prismzone_token");
+      const response = await fetch("https://backend-production-de8ef.up.railway.app/api/products/my-products", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      const token = localStorage.getItem("prismzone_token");
+      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setProducts(products.filter(p => p._id !== id));
+        toast({
+          title: "Product Deleted",
+          description: "Product has been successfully removed.",
+        });
+      } else {
+        throw new Error("Failed to delete product");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatus = (stock: number) => {
+    if (stock === 0) return "Out of Stock";
+    if (stock < 10) return "Low Stock";
+    return "Active";
+  };
 
   return (
     <DashboardLayout>
@@ -50,31 +102,52 @@ export default function Products() {
           </div>
         </div>
 
-        {view === "grid" ? (
+        {loading ? (
+          <div className="flex items-center justify-center p-20">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20 bg-card rounded-xl border border-dashed border-border">
+            <p className="text-muted-foreground">No products found. Add your first product!</p>
+          </div>
+        ) : view === "grid" ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {products.map((p) => (
-              <div key={p.id} className="bg-card rounded-xl border border-border overflow-hidden hover-lift">
-                <div className="h-40 bg-muted flex items-center justify-center text-5xl">{p.img}</div>
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-medium text-sm truncate">{p.name}</h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild><button><MoreVertical className="w-4 h-4 text-muted-foreground" /></button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Edit className="w-3.5 h-3.5 mr-2" />Edit</DropdownMenuItem>
-                        <DropdownMenuItem><Copy className="w-3.5 h-3.5 mr-2" />Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive"><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            {products.map((p) => {
+              const status = getStatus(p.stock);
+              return (
+                <div key={p._id} className="bg-card rounded-xl border border-border overflow-hidden hover-lift">
+                  <div className="h-40 bg-muted flex items-center justify-center overflow-hidden">
+                    {p.imageUrl ? (
+                      <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-5xl">📦</div>
+                    )}
                   </div>
-                  <div className="text-lg font-heading font-bold">{p.price}</div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-muted-foreground">Stock: {p.stock}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stockStatus[p.status]}`}>{p.status}</span>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-medium text-sm truncate">{p.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild><button><MoreVertical className="w-4 h-4 text-muted-foreground" /></button></DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/dashboard/products/edit/${p._id}`} className="flex items-center w-full">
+                              <Edit className="w-3.5 h-3.5 mr-2" />Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem><Copy className="w-3.5 h-3.5 mr-2" />Duplicate</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(p._id)}><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className="text-lg font-heading font-bold">${p.price}</div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-muted-foreground">Stock: {p.stock}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stockStatus[status]}`}>{status}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -87,25 +160,37 @@ export default function Products() {
                 <th className="p-4"></th>
               </tr></thead>
               <tbody>
-                {products.map((p) => (
-                  <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                    <td className="p-4 flex items-center gap-3">
-                      <span className="text-2xl">{p.img}</span>
-                      <span className="font-medium">{p.name}</span>
-                    </td>
-                    <td className="p-4 font-medium">{p.price}</td>
-                    <td className="p-4">{p.stock}</td>
-                    <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${stockStatus[p.status]}`}>{p.status}</span></td>
-                    <td className="p-4"><DropdownMenu>
-                      <DropdownMenuTrigger asChild><button><MoreVertical className="w-4 h-4 text-muted-foreground" /></button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Edit className="w-3.5 h-3.5 mr-2" />Edit</DropdownMenuItem>
-                        <DropdownMenuItem><Copy className="w-3.5 h-3.5 mr-2" />Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive"><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu></td>
-                  </tr>
-                ))}
+                {products.map((p) => {
+                  const status = getStatus(p.stock);
+                  return (
+                    <tr key={p._id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                      <td className="p-4 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>📦</span>
+                          )}
+                        </div>
+                        <span className="font-medium">{p.name}</span>
+                      </td>
+                      <td className="p-4 font-medium">${p.price}</td>
+                      <td className="p-4">{p.stock}</td>
+                      <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${stockStatus[status]}`}>{status}</span></td>
+                      <td className="p-4"><DropdownMenu>
+                        <DropdownMenuTrigger asChild><button><MoreVertical className="w-4 h-4 text-muted-foreground" /></button></DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/dashboard/products/edit/${p._id}`} className="flex items-center w-full">
+                              <Edit className="w-3.5 h-3.5 mr-2" />Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(p._id)}><Trash2 className="w-3.5 h-3.5 mr-2" />Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -4,31 +4,7 @@ import { Package, ShoppingCart, DollarSign, Users, TrendingUp, TrendingDown } fr
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from "react";
 
-const stats = [
-  { title: "Total Products", value: "156", change: "+12%", icon: Package, up: true },
-  { title: "Orders", value: "2,345", change: "+8%", icon: ShoppingCart, up: true },
-  { title: "Revenue", value: "$45,230", change: "+23%", icon: DollarSign, up: true },
-  { title: "Visitors", value: "12,456", change: "-3%", icon: Users, up: false },
-];
-
-const revenueData = [
-  { month: "Jan", revenue: 4000 }, { month: "Feb", revenue: 3000 }, { month: "Mar", revenue: 5000 },
-  { month: "Apr", revenue: 4500 }, { month: "May", revenue: 6000 }, { month: "Jun", revenue: 5500 },
-  { month: "Jul", revenue: 7000 },
-];
-
-const trafficData = [
-  { name: "Direct", value: 40 }, { name: "Social", value: 25 }, { name: "Search", value: 20 }, { name: "Referral", value: 15 },
-];
 const COLORS = ["hsl(217, 91%, 60%)", "hsl(263, 70%, 50%)", "hsl(38, 92%, 50%)", "hsl(160, 84%, 39%)"];
-
-const recentOrders = [
-  { id: "#ORD-001", customer: "Sarah J.", product: "Blue Dress", amount: "$89.99", status: "Delivered" },
-  { id: "#ORD-002", customer: "Mike C.", product: "Wireless Earbuds", amount: "$49.99", status: "Shipped" },
-  { id: "#ORD-003", customer: "Anna K.", product: "Leather Bag", amount: "$129.99", status: "Processing" },
-  { id: "#ORD-004", customer: "James L.", product: "Sneakers", amount: "$79.99", status: "Pending" },
-  { id: "#ORD-005", customer: "Lisa M.", product: "Watch", amount: "$199.99", status: "Delivered" },
-];
 
 const statusColors: Record<string, string> = {
   Delivered: "bg-success/10 text-success",
@@ -39,11 +15,51 @@ const statusColors: Record<string, string> = {
 
 export default function Dashboard() {
   const [storeName, setStoreName] = useState("your store");
+  const [stats, setStats] = useState([
+    { title: "Total Products", value: "0", change: "...", icon: Package, up: true },
+    { title: "Orders", value: "0", change: "...", icon: ShoppingCart, up: true },
+    { title: "Revenue", value: "$0", change: "...", icon: DollarSign, up: true },
+    { title: "Visitors", value: "0", change: "...", icon: Users, up: false },
+  ]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedName = localStorage.getItem("vendor_store_name");
     if (savedName) setStoreName(savedName);
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem("prismzone_token");
+      const headers = { "Authorization": `Bearer ${token}` };
+
+      // Fetch Products
+      const prodRes = await fetch("https://backend-production-de8ef.up.railway.app/api/products/my-products", { headers });
+      const products = await prodRes.json();
+
+      // Fetch Orders
+      const orderRes = await fetch("https://backend-production-de8ef.up.railway.app/api/orders/my-orders", { headers });
+      const orders = await orderRes.json();
+
+      if (prodRes.ok && orderRes.ok) {
+        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.product?.price || 0), 0);
+
+        setStats([
+          { title: "Total Products", value: products.length.toString(), change: "Live", icon: Package, up: true },
+          { title: "Orders", value: orders.length.toString(), change: "Live", icon: ShoppingCart, up: true },
+          { title: "Revenue", value: `$${totalRevenue.toFixed(2)}`, change: "Live", icon: DollarSign, up: true },
+          { title: "Visitors", value: "0", change: "N/A", icon: Users, up: false },
+        ]);
+        setRecentOrders(orders.slice(0, 5));
+      }
+    } catch (error) {
+      console.error("Dashboard fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -72,42 +88,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Revenue Chart */}
-          <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
-            <h3 className="font-heading font-semibold mb-4">Revenue Overview</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(215, 16%, 47%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(215, 16%, 47%)" />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="hsl(217, 91%, 60%)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Traffic */}
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-heading font-semibold mb-4">Traffic Sources</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={trafficData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={4}>
-                  {trafficData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap gap-3 mt-2">
-              {trafficData.map((d, i) => (
-                <div key={d.name} className="flex items-center gap-1.5 text-xs">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[i] }} />
-                  {d.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Charts removed because of static data */}
 
         {/* Recent Orders */}
         <div className="bg-card rounded-xl border border-border p-5">
@@ -127,13 +108,15 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((o) => (
-                  <tr key={o.id} className="border-b border-border last:border-0">
-                    <td className="py-3 font-medium">{o.id}</td>
-                    <td className="py-3">{o.customer}</td>
-                    <td className="py-3">{o.product}</td>
-                    <td className="py-3 font-medium">{o.amount}</td>
-                    <td className="py-3"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[o.status]}`}>{o.status}</span></td>
+                {recentOrders.length === 0 ? (
+                  <tr><td colSpan={5} className="py-8 text-center text-muted-foreground font-medium">No orders yet.</td></tr>
+                ) : recentOrders.map((o) => (
+                  <tr key={o._id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <td className="py-3 font-medium uppercase text-[10px] tracking-widest text-primary">#{o._id.slice(-6)}</td>
+                    <td className="py-3 font-bold">{o.customerName}</td>
+                    <td className="py-3 text-slate-500 font-medium">{o.product?.name || "Product Deleted"}</td>
+                    <td className="py-3 font-black text-primary">${o.product?.price || 0}</td>
+                    <td className="py-3"><span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColors[o.status || 'Pending']}`}>{o.status || 'Pending'}</span></td>
                   </tr>
                 ))}
               </tbody>

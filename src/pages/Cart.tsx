@@ -1,87 +1,103 @@
 import StoreLayout from "@/components/StoreLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { Minus, Plus, X, ArrowRight, Tag } from "lucide-react";
-import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Heart, ArrowRight, Trash2, ShoppingBag } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
-const initialCart = [
-  { id: 1, name: "Classic Blue Dress", size: "M", color: "Blue", price: 89.99, qty: 1, img: "👗" },
-  { id: 2, name: "Wireless Earbuds Pro", size: "-", color: "White", price: 49.99, qty: 2, img: "🎧" },
-  { id: 3, name: "Leather Crossbody Bag", size: "-", color: "Brown", price: 129.99, qty: 1, img: "👜" },
-];
+export default function Favorites() {
+  const { slug } = useParams();
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-export default function Cart() {
-  const [cart, setCart] = useState(initialCart);
-  const [coupon, setCoupon] = useState("");
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
 
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = subtotal > 50 ? 0 : 5.99;
-  const total = subtotal + shipping;
+  const fetchFavorites = async () => {
+    try {
+      const favIds = JSON.parse(localStorage.getItem("user_favorites") || "[]");
+      if (favIds.length === 0) {
+        setFavorites([]);
+        setLoading(false);
+        return;
+      }
 
-  const updateQty = (id: number, delta: number) => {
-    setCart(cart.map((i) => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+      // We fetch all products and filter locally for simplicity, 
+      // or we could add a bulk fetch endpoint. Given the scale, filtering is fine.
+      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/store/${slug || 'my-store'}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const filtered = data.filter((p: any) => favIds.includes(p._id));
+        setFavorites(filtered);
+      }
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const remove = (id: number) => setCart(cart.filter((i) => i.id !== id));
+  const removeFavorite = (id: string) => {
+    const favIds = JSON.parse(localStorage.getItem("user_favorites") || "[]");
+    const newIds = favIds.filter((favId: string) => favId !== id);
+    localStorage.setItem("user_favorites", JSON.stringify(newIds));
+    setFavorites(favorites.filter(p => p._id !== id));
+    toast({
+      title: "Removed",
+      description: "Product removed from your favorites.",
+    });
+  };
 
   return (
     <StoreLayout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-heading font-bold mb-8">Shopping Cart</h1>
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center gap-3 mb-8">
+          <Heart className="w-8 h-8 text-destructive fill-current" />
+          <h1 className="text-4xl font-heading font-black">My Favorites</h1>
+        </div>
 
-        {cart.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg mb-4">Your cart is empty</p>
-            <Button className="gradient-bg border-0 text-primary-foreground" asChild><Link to="/store/my-store/products">Continue Shopping</Link></Button>
+        {loading ? (
+          <div className="flex items-center justify-center p-20">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : favorites.length === 0 ? (
+          <div className="text-center py-20 bg-muted/30 rounded-3xl border-2 border-dashed border-border">
+            <p className="text-muted-foreground text-lg mb-6 font-medium">You haven't added any favorites yet.</p>
+            <Button className="gradient-bg border-0 text-primary-foreground font-bold rounded-full px-8" asChild>
+              <Link to={`/store/${slug}/products`}>Explore Products</Link>
+            </Button>
           </div>
         ) : (
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              {cart.map((item) => (
-                <div key={item.id} className="bg-card rounded-xl border border-border p-4 flex gap-4">
-                  <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center text-4xl shrink-0">{item.img}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium">{item.name}</h3>
-                        <p className="text-sm text-muted-foreground">Size: {item.size} · Color: {item.color}</p>
-                      </div>
-                      <button onClick={() => remove(item.id)} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-border rounded-lg">
-                        <button onClick={() => updateQty(item.id, -1)} className="p-1.5"><Minus className="w-3.5 h-3.5" /></button>
-                        <span className="px-3 text-sm font-medium">{item.qty}</span>
-                        <button onClick={() => updateQty(item.id, 1)} className="p-1.5"><Plus className="w-3.5 h-3.5" /></button>
-                      </div>
-                      <span className="font-heading font-bold">${(item.price * item.qty).toFixed(2)}</span>
-                    </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {favorites.map((item) => (
+              <div key={item._id} className="bg-card rounded-3xl border border-border overflow-hidden hover:shadow-xl transition-all group">
+                <div className="aspect-square bg-muted relative overflow-hidden">
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-5xl">📦</div>
+                  )}
+                  <button
+                    onClick={() => removeFavorite(item._id)}
+                    className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-destructive hover:bg-white transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-heading font-bold text-lg mb-1 truncate">{item.name}</h3>
+                  <div className="text-xl font-black text-primary mb-4">${item.price}</div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 gradient-bg border-0 text-primary-foreground font-bold rounded-full" asChild>
+                      <Link to={`/store/${slug}/products`}>Order Now</Link>
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div>
-              <div className="bg-card rounded-xl border border-border p-6 sticky top-20">
-                <h3 className="font-heading font-semibold mb-4">Order Summary</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping === 0 ? <span className="text-success">Free</span> : `$${shipping.toFixed(2)}`}</span></div>
-                  <div className="border-t border-border pt-3 flex justify-between font-heading font-bold text-base"><span>Total</span><span>${total.toFixed(2)}</span></div>
-                </div>
-
-                <div className="flex gap-2 mt-5">
-                  <Input placeholder="Coupon code" value={coupon} onChange={(e) => setCoupon(e.target.value)} className="flex-1" />
-                  <Button variant="outline" size="sm"><Tag className="w-3.5 h-3.5" /></Button>
-                </div>
-
-                <Button className="w-full mt-4 gradient-bg border-0 text-primary-foreground" size="lg" asChild>
-                  <Link to="/checkout">Checkout <ArrowRight className="ml-2 w-4 h-4" /></Link>
-                </Button>
-                <p className="text-xs text-center text-muted-foreground mt-3">Free shipping on orders over $50</p>
               </div>
-            </div>
+            ))}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Store, Search, ShoppingCart, Menu, X, LayoutDashboard } from "lucide-react";
+import { Store, Search, Heart, Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -85,9 +85,11 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
               </Button>
 
               <Button variant="ghost" size="icon" className="w-11 h-11 rounded-full hover:bg-slate-100 relative group" asChild>
-                <Link to="/cart">
-                  <ShoppingCart className="w-5 h-5 group-hover:text-primary transition-all" />
-                  <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-black shadow-md border-2 border-white">3</span>
+                <Link to={`/store/${slug}/cart`}>
+                  <Heart className="w-5 h-5 group-hover:text-destructive transition-all" />
+                  <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-black shadow-md border-2 border-white animate-in zoom-in">
+                    {JSON.parse(localStorage.getItem("user_favorites") || "[]").length}
+                  </span>
                 </Link>
               </Button>
             </div>
