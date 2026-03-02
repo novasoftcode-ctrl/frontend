@@ -2,9 +2,9 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Upload, Plus, X, Image as ImageIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function AddProduct() {
@@ -15,6 +15,7 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [productData, setProductData] = useState({
     name: "",
