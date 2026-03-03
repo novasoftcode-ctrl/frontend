@@ -40,7 +40,10 @@ export default function StoreProducts() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (slug) fetchProducts(slug);
+    if (slug) {
+      const cleanSlug = slug.trim().toLowerCase();
+      fetchProducts(cleanSlug);
+    }
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
   }, [slug]);

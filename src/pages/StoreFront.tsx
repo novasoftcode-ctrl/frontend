@@ -52,14 +52,15 @@ export default function StoreFront() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (normalizedSlug) {
-      fetchStoreDetails(normalizedSlug);
-      fetchProducts(normalizedSlug);
+    if (slug) {
+      const cleanSlug = slug.trim().toLowerCase();
+      fetchStoreDetails(cleanSlug);
+      fetchProducts(cleanSlug);
     }
 
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
-  }, [normalizedSlug]);
+  }, [slug]);
 
   const fetchStoreDetails = async (storeSlug: string) => {
     try {
