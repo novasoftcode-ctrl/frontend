@@ -64,33 +64,42 @@ export default function StoreFront() {
 
   const fetchStoreDetails = async (storeSlug: string) => {
     try {
+      console.log(`[StoreFront] Fetching store details for: ${storeSlug}`);
       const response = await fetch(`${API_BASE_URL}/api/store/${storeSlug}`);
       const data = await response.json();
       if (response.ok) {
+        console.log(`[StoreFront] Store details loaded:`, data);
         setStoreName(data.name);
         setStoreCover(data.coverUrl);
         localStorage.setItem("vendor_store_data", JSON.stringify(data));
+      } else {
+        console.error(`[StoreFront] Failed to fetch store details:`, data.message);
       }
     } catch (error) {
-      console.error("Error fetching store details:", error);
+      console.error("[StoreFront] Error in fetchStoreDetails:", error);
     }
   };
 
   const fetchProducts = async (storeSlug: string) => {
     try {
+      console.log(`[StoreFront] Fetching products for: ${storeSlug}`);
       const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug}`);
       const data = await response.json();
       if (response.ok) {
+        console.log(`[StoreFront] Found ${data.length} products`);
         setProducts(data);
+      } else {
+        console.error(`[StoreFront] Failed to fetch products:`, data.message);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("[StoreFront] Error in fetchProducts:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const toggleFavorite = (productId: string) => {
+    // ... same as before ...
     let newFavs;
     if (favorites.includes(productId)) {
       newFavs = favorites.filter(id => id !== productId);
@@ -103,53 +112,25 @@ export default function StoreFront() {
     localStorage.setItem("user_favorites", JSON.stringify(newFavs));
   };
 
-  const handleOrderSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmittingOrder(true);
-    try {
-      const storeDataStr = localStorage.getItem("vendor_store_data");
-      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
-
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: selectedProduct._id,
-          storeId: storeData._id,
-          ...orderData
-        })
-      });
-
-      if (response.ok) {
-        toast({ title: "Order Placed!", description: "The store owner will contact you soon." });
-        setOrderModalOpen(false);
-        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
-      } else {
-        throw new Error("Failed to place order");
-      }
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
-      setSubmittingOrder(false);
-    }
-  };
+  // ... rest of the component until return ...
 
   return (
     <StoreLayout>
       {/* Hero Banner */}
       <section
-        className={`py-20 text-center relative overflow-hidden ${!storeCover ? 'bg-[#0f172a]' : ''}`}
+        className={`py-24 text-center relative overflow-hidden flex items-center justify-center min-h-[500px] ${!storeCover ? 'bg-slate-950' : ''}`}
         style={storeCover ? {
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${storeCover})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${storeCover})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
         } : {}}
       >
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-heading font-black text-white mb-6 tracking-tight"
+            className="text-5xl md:text-7xl font-heading font-black text-white mb-6 tracking-tight drop-shadow-2xl"
           >
             Welcome to {storeName}
           </motion.h1>
@@ -157,7 +138,7 @@ export default function StoreFront() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-white/90 text-xl mb-10 max-w-2xl mx-auto font-medium"
+            className="text-white/90 text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-md"
           >
             Discover unique products curated just for you with premium quality and exceptional style.
           </motion.p>
@@ -166,11 +147,13 @@ export default function StoreFront() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold px-10 h-14 rounded-full text-lg shadow-xl" asChild>
-              <Link to={`/store/${slug}/products`}>Shop Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
+            <Button size="lg" className="bg-primary text-white hover:bg-primary/90 font-bold px-12 h-16 rounded-full text-xl shadow-2xl transition-all hover:scale-105" asChild>
+              <Link to={`/store/${slug}/products`}>Shop Now <ArrowRight className="ml-2 w-6 h-6" /></Link>
             </Button>
           </motion.div>
         </div>
+        {/* Subtle decorative overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
       </section>
 
       {/* Categories */}

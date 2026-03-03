@@ -51,14 +51,18 @@ export default function StoreProducts() {
   const fetchProducts = async (storeSlug: string) => {
     setLoading(true);
     try {
+      console.log(`[StoreProducts] Fetching products for: ${storeSlug}`);
       // Use lowercase slug for consistency with backend expectation
       const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug.toLowerCase()}`);
       const data = await response.json();
       if (response.ok) {
+        console.log(`[StoreProducts] Found ${data.length} products`);
         setProducts(data);
+      } else {
+        console.error(`[StoreProducts] Failed to fetch products:`, data.message);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("[StoreProducts] Error in fetchProducts:", error);
     } finally {
       setLoading(false);
     }
