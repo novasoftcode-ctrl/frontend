@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { Heart, ArrowRight, Trash2, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export default function Favorites() {
   const { slug } = useParams();
@@ -26,7 +27,7 @@ export default function Favorites() {
 
       // We fetch all products and filter locally for simplicity, 
       // or we could add a bulk fetch endpoint. Given the scale, filtering is fine.
-      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/store/${slug || 'my-store'}`);
+      const response = await fetch(`${API_BASE_URL}/api/products/store/${slug || 'my-store'}`);
       const data = await response.json();
 
       if (response.ok) {

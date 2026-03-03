@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Store, Upload, Check, Copy, QrCode, ArrowRight, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 const categories = ["Fashion", "Electronics", "Food & Beverages", "Home & Garden", "Health & Beauty", "Sports", "Arts & Crafts", "Other"];
 const colorPresets = [
@@ -117,7 +118,7 @@ export default function CreateStore() {
         if (logoFileRef.current) storeFormData.append("logo", logoFileRef.current);
         if (coverFileRef.current) storeFormData.append("cover", coverFileRef.current);
 
-        const response = await fetch("https://backend-production-de8ef.up.railway.app/api/store/create", {
+        const response = await fetch(`${API_BASE_URL}/api/store/create`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -413,14 +414,14 @@ export default function CreateStore() {
               <h2 className="text-2xl font-heading font-bold mb-2 text-foreground">🎉 Your Store is Live!</h2>
               <p className="text-muted-foreground text-sm mb-6">Congratulations! Your store <span className="text-primary font-bold">"{formData.name}"</span> has been created successfully.</p>
               <div className="bg-muted rounded-xl p-4 flex items-center justify-between mb-6 shadow-inner">
-                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1">https://prism-zone.netlify.app/store/{formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store'}</span>
+                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1">https://prismzone.vercel.app/store/{formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store'}</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="hover:bg-primary/10 hover:text-primary transition-colors flex-shrink-0"
                   onClick={() => {
                     const slug = formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store';
-                    const url = `https://prism-zone.netlify.app/store/${slug}`;
+                    const url = `https://prismzone.vercel.app/store/${slug}`;
                     navigator.clipboard.writeText(url);
                     toast({ title: "Copied!", description: "Link copied to clipboard" });
                   }}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Store, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export default function Signup() {
   const [showPw, setShowPw] = useState(false);
@@ -32,7 +33,7 @@ export default function Signup() {
     }
 
     try {
-      const response = await fetch("https://backend-production-de8ef.up.railway.app/api/auth/signup", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

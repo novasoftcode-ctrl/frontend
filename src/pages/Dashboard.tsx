@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Package, ShoppingCart, DollarSign, Users, TrendingUp, TrendingDown } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/config/api";
 
 const COLORS = ["hsl(217, 91%, 60%)", "hsl(263, 70%, 50%)", "hsl(38, 92%, 50%)", "hsl(160, 84%, 39%)"];
 
@@ -36,11 +37,11 @@ export default function Dashboard() {
       const headers = { "Authorization": `Bearer ${token}` };
 
       // Fetch Products
-      const prodRes = await fetch("https://backend-production-de8ef.up.railway.app/api/products/my-products", { headers });
+      const prodRes = await fetch(`${API_BASE_URL}/api/products/my-products`, { headers });
       const products = await prodRes.json();
 
       // Fetch Orders
-      const orderRes = await fetch("https://backend-production-de8ef.up.railway.app/api/orders/my-orders", { headers });
+      const orderRes = await fetch(`${API_BASE_URL}/api/orders/my-orders`, { headers });
       const orders = await orderRes.json();
 
       if (prodRes.ok && orderRes.ok) {

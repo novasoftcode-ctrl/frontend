@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Store, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export default function Login() {
   const [showPw, setShowPw] = useState(false);
@@ -18,7 +19,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://backend-production-de8ef.up.railway.app/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -6,6 +6,7 @@ import { Search, Plus, Grid3X3, List, MoreVertical, Edit, Trash2, Copy } from "l
 import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 const stockStatus: Record<string, string> = {
   Active: "bg-success/10 text-success",
@@ -26,7 +27,7 @@ export default function Products() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("prismzone_token");
-      const response = await fetch("https://backend-production-de8ef.up.railway.app/api/products/my-products", {
+      const response = await fetch(`${API_BASE_URL}/api/products/my-products`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -47,7 +48,7 @@ export default function Products() {
 
     try {
       const token = localStorage.getItem("prismzone_token");
-      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

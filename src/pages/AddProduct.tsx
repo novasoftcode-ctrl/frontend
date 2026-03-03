@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Upload, Plus, X, Image as ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export default function AddProduct() {
   const { id } = useParams();
@@ -37,7 +38,7 @@ export default function AddProduct() {
   const fetchProduct = async () => {
     try {
       const token = localStorage.getItem("prismzone_token");
-      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/my-products`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/my-products`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await response.json();
@@ -112,8 +113,8 @@ export default function AddProduct() {
       formData.append("variants", JSON.stringify(variants.filter(v => v.size || v.color)));
 
       const url = id
-        ? `https://backend-production-de8ef.up.railway.app/api/products/${id}`
-        : "https://backend-production-de8ef.up.railway.app/api/products";
+        ? `${API_BASE_URL}/api/products/${id}`
+        : `${API_BASE_URL}/api/products`;
 
       const method = id ? "PUT" : "POST";
 

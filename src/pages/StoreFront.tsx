@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { API_BASE_URL } from "@/config/api";
 
 // Categories will be derived dynamically from products
 
@@ -58,7 +59,7 @@ export default function StoreFront() {
     setSubmittingOrder(true);
     try {
       const storeData = JSON.parse(localStorage.getItem("vendor_store_data") || "{}");
-      const response = await fetch("https://backend-production-de8ef.up.railway.app/api/orders", {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,7 +102,7 @@ export default function StoreFront() {
 
   const fetchProducts = async (storeSlug: string) => {
     try {
-      const response = await fetch(`https://backend-production-de8ef.up.railway.app/api/products/store/${storeSlug}`);
+      const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug}`);
       const data = await response.json();
       if (response.ok) {
         setProducts(data);
