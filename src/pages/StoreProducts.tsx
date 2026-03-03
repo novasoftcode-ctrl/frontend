@@ -1,10 +1,10 @@
 import StoreLayout from "@/components/StoreLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, SlidersHorizontal, Heart, Clock } from "lucide-react";
+import { Search, SlidersHorizontal, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { API_BASE_URL } from "@/config/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -13,10 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function StoreProducts() {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCat, setSelectedCat] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -32,14 +33,23 @@ export default function StoreProducts() {
   const [submittingOrder, setSubmittingOrder] = useState(false);
 
   useEffect(() => {
+    const search = searchParams.get("search");
+    if (search !== null) {
+      setSearchQuery(search);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (slug) fetchProducts(slug);
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
   }, [slug]);
 
   const fetchProducts = async (storeSlug: string) => {
+    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug}`);
+      // Use lowercase slug for consistency with backend expectation
+      const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug.toLowerCase()}`);
       const data = await response.json();
       if (response.ok) {
         setProducts(data);
@@ -68,7 +78,9 @@ export default function StoreProducts() {
     e.preventDefault();
     setSubmittingOrder(true);
     try {
-      const storeData = JSON.parse(localStorage.getItem("vendor_store_data") || "{}");
+      const storeDataStr = localStorage.getItem("vendor_store_data");
+      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
+
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,7 +155,7 @@ export default function StoreProducts() {
           {/* Product Grid */}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-8 px-2">
-              <h2 className="text-2xl font-heading font-bold">{selectedCat} Collection</h2>
+              <h2 className="text-2xl font-heading font-bold">{selectedCat === "All" ? "Full" : selectedCat} Collection</h2>
               <p className="text-sm font-medium text-muted-foreground">{filtered.length} products found</p>
             </div>
 
@@ -179,8 +191,8 @@ export default function StoreProducts() {
                       </button>
                     </div>
                     <div className="p-6">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-2 block">{p.category}</span>
-                      <h3 className="font-heading font-bold text-lg mb-4 group-hover:text-primary transition-colors">{p.name}</h3>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-2 block">{p.category || "General"}</span>
+                      <h3 className="font-heading font-bold text-lg mb-4 group-hover:text-primary transition-colors truncate">{p.name}</h3>
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-2xl font-black text-foreground">Rs. {p.price}</span>
                         <Button

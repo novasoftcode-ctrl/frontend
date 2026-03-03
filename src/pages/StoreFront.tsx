@@ -11,15 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { API_BASE_URL } from "@/config/api";
 
-// Categories will be derived dynamically from products
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1 } }),
-};
-
 export default function StoreFront() {
   const { slug } = useParams();
+  const normalizedSlug = slug?.toLowerCase();
   const [storeName, setStoreName] = useState("My Store");
   const [storeCover, setStoreCover] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]);
@@ -28,18 +22,25 @@ export default function StoreFront() {
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  // Derive dynamic categories
   const categories = products.reduce((acc: any[], p: any) => {
     const catName = p.category || "General";
     const existing = acc.find(c => c.name === catName);
     if (existing) {
       existing.count++;
     } else {
-      const emojiMap: Record<string, string> = { "Fashion": "👗", "Electronics": "🎧", "Accessories": "👜", "Footwear": "👟" };
+      const emojiMap: Record<string, string> = {
+        "Fashion": "👗",
+        "Electronics": "🎧",
+        "Accessories": "👜",
+        "Footwear": "👟",
+        "Gents": "👔",
+        "Suits": "🤵"
+      };
       acc.push({ name: catName, emoji: emojiMap[catName] || "📦", count: 1 });
     }
     return acc;
   }, []);
+
   const [orderData, setOrderData] = useState({
     customerName: "",
     customerEmail: "",
@@ -50,49 +51,15 @@ export default function StoreFront() {
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const { toast } = useToast();
 
-  const handleOrderSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderData.customerName || !orderData.customerPhone || !orderData.customerAddress) {
-      toast({ title: "Required Fields", description: "Please fill in all details.", variant: "destructive" });
-      return;
-    }
-
-    setSubmittingOrder(true);
-    try {
-      const storeData = JSON.parse(localStorage.getItem("vendor_store_data") || "{}");
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: selectedProduct._id,
-          storeId: storeData._id,
-          ...orderData
-        })
-      });
-
-      if (response.ok) {
-        toast({ title: "Order Placed!", description: "The store owner will contact you soon." });
-        setOrderModalOpen(false);
-        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
-      } else {
-        throw new Error("Failed to place order");
-      }
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
-      setSubmittingOrder(false);
-    }
-  };
-
   useEffect(() => {
-    if (slug) {
-      fetchStoreDetails(slug);
-      fetchProducts(slug);
+    if (normalizedSlug) {
+      fetchStoreDetails(normalizedSlug);
+      fetchProducts(normalizedSlug);
     }
 
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
-  }, [slug]);
+  }, [normalizedSlug]);
 
   const fetchStoreDetails = async (storeSlug: string) => {
     try {
@@ -101,7 +68,6 @@ export default function StoreFront() {
       if (response.ok) {
         setStoreName(data.name);
         setStoreCover(data.coverUrl);
-        // Save to local storage for other pages to use if needed, but don't rely on it for this page
         localStorage.setItem("vendor_store_data", JSON.stringify(data));
       }
     } catch (error) {
@@ -127,32 +93,62 @@ export default function StoreFront() {
     let newFavs;
     if (favorites.includes(productId)) {
       newFavs = favorites.filter(id => id !== productId);
-      toast({ title: "Removed from Favorites", description: "Product removed from your list." });
+      toast({ title: "Removed", description: "Product removed from favorites." });
     } else {
       newFavs = [...favorites, productId];
-      toast({ title: "Added to Favorites", description: "Product added to your wishlist! ❤️" });
+      toast({ title: "Added", description: "Product added to favorites! ❤️" });
     }
     setFavorites(newFavs);
     localStorage.setItem("user_favorites", JSON.stringify(newFavs));
+  };
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingOrder(true);
+    try {
+      const storeDataStr = localStorage.getItem("vendor_store_data");
+      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
+
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: selectedProduct._id,
+          storeId: storeData._id,
+          ...orderData
+        })
+      });
+
+      if (response.ok) {
+        toast({ title: "Order Placed!", description: "The store owner will contact you soon." });
+        setOrderModalOpen(false);
+        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
+      } else {
+        throw new Error("Failed to place order");
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmittingOrder(false);
+    }
   };
 
   return (
     <StoreLayout>
       {/* Hero Banner */}
       <section
-        className={`py-20 text-center relative overflow-hidden ${!storeCover ? 'gradient-bg' : ''}`}
+        className={`py-20 text-center relative overflow-hidden ${!storeCover ? 'bg-[#0f172a]' : ''}`}
         style={storeCover ? {
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${storeCover})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         } : {}}
       >
-        {!storeCover && <div className="absolute inset-0 bg-black/5 pointer-events-none" />}
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-heading font-black text-primary-foreground mb-6 tracking-tight"
+            className="text-4xl md:text-6xl font-heading font-black text-white mb-6 tracking-tight"
           >
             Welcome to {storeName}
           </motion.h1>
@@ -160,7 +156,7 @@ export default function StoreFront() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-primary-foreground/90 text-xl mb-10 max-w-2xl mx-auto font-medium"
+            className="text-white/90 text-xl mb-10 max-w-2xl mx-auto font-medium"
           >
             Discover unique products curated just for you with premium quality and exceptional style.
           </motion.p>
@@ -169,7 +165,7 @@ export default function StoreFront() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold px-10 h-14 rounded-full text-lg shadow-xl shadow-black/10" asChild>
+            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold px-10 h-14 rounded-full text-lg shadow-xl" asChild>
               <Link to={`/store/${slug}/products`}>Shop Now <ArrowRight className="ml-2 w-5 h-5" /></Link>
             </Button>
           </motion.div>
@@ -185,7 +181,7 @@ export default function StoreFront() {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((c, i) => (
-              <motion.div key={c.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+              <motion.div key={c.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Link to={`/store/${slug}/products`} className="block bg-white rounded-2xl border border-border p-8 text-center hover-lift shadow-sm hover:shadow-md transition-all">
                   <span className="text-5xl block mb-4">{c.emoji}</span>
                   <h3 className="font-heading font-bold text-lg mb-1">{c.name}</h3>
@@ -212,12 +208,12 @@ export default function StoreFront() {
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20 bg-muted/30 rounded-3xl border-2 border-dashed border-border">
-              <p className="text-muted-foreground font-medium">No products available at the moment.</p>
+            <div className="text-center py-20 bg-muted/30 rounded-3xl border-2 border-dashed border-border px-6">
+              <p className="text-muted-foreground font-medium text-lg">No products available at the moment.</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.map((p) => (
+              {products.slice(0, 8).map((p) => (
                 <motion.div
                   key={p._id}
                   whileHover={{ y: -10 }}
@@ -229,63 +225,31 @@ export default function StoreFront() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-6xl">📦</div>
                     )}
-                    {p.stock === 0 && (
-                      <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
-                        <span className="bg-destructive text-destructive-foreground px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">Out of Stock</span>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => toggleFavorite(p._id)}
+                      className={`absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all hover:scale-110 ${favorites.includes(p._id) ? "text-destructive" : "text-slate-400"}`}
+                    >
+                      <Heart className={`w-5 h-5 ${favorites.includes(p._id) ? "fill-current" : ""}`} />
+                    </button>
                   </div>
                   <div className="p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{p.category || "General"}</span>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary/20" />)}
-                      </div>
-                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-2 block">{p.category || "General"}</span>
                     <h3 className="font-heading font-bold text-lg mb-1 group-hover:text-primary transition-colors truncate">{p.name}</h3>
-                    <div className="flex items-center justify-between mt-4 gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-xl font-black text-foreground">Rs. {p.price}</span>
-                        {p.comparePrice && <span className="text-xs text-muted-foreground line-through">Rs. {p.comparePrice}</span>}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleFavorite(p._id)}
-                          className={`w-10 h-10 rounded-full border border-border flex items-center justify-center transition-all hover:scale-110 ${favorites.includes(p._id) ? "bg-destructive/10 text-destructive border-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                        >
-                          <Heart className={`w-5 h-5 ${favorites.includes(p._id) ? "fill-current" : ""}`} />
-                        </button>
-                        <Button
-                          size="sm"
-                          onClick={() => { setSelectedProduct(p); setOrderModalOpen(true); }}
-                          className="rounded-full px-5 gradient-bg border-0 text-primary-foreground font-black shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-                        >
-                          Order Now
-                        </Button>
-                      </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-xl font-black text-foreground">Rs. {p.price}</span>
+                      <Button
+                        size="sm"
+                        onClick={() => { setSelectedProduct(p); setOrderModalOpen(true); }}
+                        className="rounded-full px-5 gradient-bg border-0 text-primary-foreground font-black"
+                      >
+                        Order Now
+                      </Button>
                     </div>
                   </div>
                 </motion.div>
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="bg-primary rounded-3xl p-10 md:p-16 text-center text-primary-foreground relative overflow-hidden shadow-2xl shadow-primary/20">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/5 rounded-full -ml-32 -mb-32 blur-3xl" />
-
-            <h2 className="text-3xl md:text-4xl font-heading font-black mb-4 relative z-10">Stay Updated with {storeName}</h2>
-            <p className="text-primary-foreground/80 text-lg mb-10 max-w-xl mx-auto font-medium relative z-10">Subscribe for new arrivals, exclusive deals, and more.</p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto relative z-10">
-              <Input placeholder="Enter your email" className="h-14 rounded-full border-0 bg-white/10 text-white placeholder:text-white/50 px-8 focus-visible:ring-white/30 text-lg" />
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-black h-14 rounded-full px-8 shadow-xl">Subscribe</Button>
-            </div>
-          </div>
         </div>
       </section>
 

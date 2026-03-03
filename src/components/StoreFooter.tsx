@@ -27,6 +27,7 @@ export default function StoreFooter() {
     const email = storeData?.email || "Email not available";
     const instagram = storeData?.instagram || "#";
     const facebook = storeData?.facebook || "#";
+    const logoUrl = storeData?.logoUrl;
 
     return (
         <footer className="bg-[#0f172a] text-white pt-16 pb-8 relative overflow-hidden">
@@ -35,8 +36,12 @@ export default function StoreFooter() {
                     {/* Store Info */}
                     <div className="md:col-span-5 space-y-6">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20">
-                                <Store className="w-6 h-6 text-white" />
+                            <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
+                                {logoUrl ? (
+                                    <img src={logoUrl} alt={name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <Store className="w-6 h-6 text-white" />
+                                )}
                             </div>
                             <h3 className="font-heading font-black text-2xl tracking-tight">{name}</h3>
                         </div>
