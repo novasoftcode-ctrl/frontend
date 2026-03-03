@@ -56,7 +56,7 @@ export default function Products() {
       });
 
       if (response.ok) {
-        setProducts(products.filter(p => p._id !== id));
+        setProducts(prev => prev.filter(p => p._id !== id));
         toast({
           title: "Product Deleted",
           description: "Product has been successfully removed.",

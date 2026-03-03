@@ -137,6 +137,11 @@ export default function AddProduct() {
         description: `${productData.name} has been saved!`,
       });
 
+      // Clear any cached data if necessary
+      if (id) {
+        // If we had a global state for products, we'd update it here
+      }
+
       navigate("/dashboard/products");
     } catch (error: any) {
       toast({

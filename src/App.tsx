@@ -20,6 +20,7 @@ import Analytics from "./pages/Analytics";
 import DashboardSettings from "./pages/DashboardSettings";
 import StoreFront from "./pages/StoreFront";
 import StoreProducts from "./pages/StoreProducts";
+import Favorites from "./pages/Favorites";
 import ProductDetail from "./pages/ProductDetail";
 import StoreAbout from "./pages/StoreAbout";
 import StoreContact from "./pages/StoreContact";
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/dashboard/settings" element={<DashboardSettings />} />
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/store/:slug/products" element={<StoreProducts />} />
+            <Route path="/store/:slug/favorites" element={<Favorites />} />
             <Route path="/store/:slug/product/:id" element={<ProductDetail />} />
             <Route path="/store/:slug/about" element={<StoreAbout />} />
             <Route path="/store/:slug/contact" element={<StoreContact />} />
@@ -96,7 +98,6 @@ const App = () => (
             <Route path="/help" element={<Support />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
-            {/* <Route path="/cookies" element={<CookiesPolicy />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

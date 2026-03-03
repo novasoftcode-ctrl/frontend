@@ -44,7 +44,8 @@ export default function StoreFront() {
     customerName: "",
     customerEmail: "",
     customerPhone: "",
-    customerAddress: ""
+    customerAddress: "",
+    quantity: 1
   });
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const { toast } = useToast();
@@ -72,7 +73,7 @@ export default function StoreFront() {
       if (response.ok) {
         toast({ title: "Order Placed!", description: "The store owner will contact you soon." });
         setOrderModalOpen(false);
-        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "" });
+        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
       } else {
         throw new Error("Failed to place order");
       }
@@ -244,8 +245,8 @@ export default function StoreFront() {
                     <h3 className="font-heading font-bold text-lg mb-1 group-hover:text-primary transition-colors truncate">{p.name}</h3>
                     <div className="flex items-center justify-between mt-4 gap-3">
                       <div className="flex flex-col">
-                        <span className="text-xl font-black text-foreground">${p.price}</span>
-                        {p.comparePrice && <span className="text-xs text-muted-foreground line-through">${p.comparePrice}</span>}
+                        <span className="text-xl font-black text-foreground">Rs. {p.price}</span>
+                        {p.comparePrice && <span className="text-xs text-muted-foreground line-through">Rs. {p.comparePrice}</span>}
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -311,6 +312,10 @@ export default function StoreFront() {
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number *</Label>
                   <Input id="phone" type="tel" placeholder="+92 300 1234567" value={orderData.customerPhone} onChange={(e) => setOrderData({ ...orderData, customerPhone: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="qty">Quantity *</Label>
+                  <Input id="qty" type="number" min="1" value={orderData.quantity} onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) || 1 })} required />
                 </div>
               </div>
               <div className="space-y-2">

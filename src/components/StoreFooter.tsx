@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Store, Facebook, Instagram, Mail, Phone, MapPin, ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function StoreFooter() {
+    const { slug } = useParams();
     const [storeData, setStoreData] = useState<any>(null);
 
     useEffect(() => {
@@ -14,15 +15,16 @@ export default function StoreFooter() {
                 console.error("Error parsing store data", e);
             }
         }
-    }, []);
+    }, [slug]);
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const name = storeData?.name || "Our Store";
-    const address = storeData?.address || "Available on request";
-    const phone = storeData?.phone || "Contact us for details";
+    const address = storeData?.address || "Address not available";
+    const phone = storeData?.phone || "Phone not available";
+    const email = storeData?.email || "Email not available";
     const instagram = storeData?.instagram || "#";
     const facebook = storeData?.facebook || "#";
 
@@ -56,10 +58,10 @@ export default function StoreFooter() {
                         <h4 className="font-heading font-bold text-lg mb-6">Explore</h4>
                         <ul className="space-y-4">
                             {[
-                                ["Home", "/store/my-store"],
-                                ["Our Products", "/store/my-store/products"],
-                                ["About Us", "/store/my-store/about"],
-                                ["Contact", "/store/my-store/contact"]
+                                ["Home", `/store/${slug}`],
+                                ["Our Products", `/store/${slug}/products`],
+                                ["About Us", `/store/${slug}/about`],
+                                ["Contact", `/store/${slug}/contact`]
                             ].map(([label, href]) => (
                                 <li key={label}>
                                     <Link to={href} className="text-slate-400 hover:text-primary transition-colors font-medium">
@@ -84,7 +86,7 @@ export default function StoreFooter() {
                             </div>
                             <div className="flex items-center gap-4 text-slate-400">
                                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                                <p className="text-sm font-medium">store.support@example.com</p>
+                                <p className="text-sm font-medium">{email}</p>
                             </div>
                         </div>
                     </div>
