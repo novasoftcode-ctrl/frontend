@@ -84,21 +84,29 @@ export default function StoreFront() {
   };
 
   useEffect(() => {
-    const storeDataStr = localStorage.getItem("vendor_store_data");
-    if (storeDataStr) {
-      const parsed = JSON.parse(storeDataStr);
-      if (parsed.name) setStoreName(parsed.name);
-      if (parsed.coverUrl) setStoreCover(parsed.coverUrl);
-
-      const storeSlug = parsed.name.toLowerCase().replace(/\s+/g, '-');
-      fetchProducts(storeSlug);
-    } else {
-      setLoading(false);
+    if (slug) {
+      fetchStoreDetails(slug);
+      fetchProducts(slug);
     }
 
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
-  }, []);
+  }, [slug]);
+
+  const fetchStoreDetails = async (storeSlug: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/store/${storeSlug}`);
+      const data = await response.json();
+      if (response.ok) {
+        setStoreName(data.name);
+        setStoreCover(data.coverUrl);
+        // Save to local storage for other pages to use if needed, but don't rely on it for this page
+        localStorage.setItem("vendor_store_data", JSON.stringify(data));
+      }
+    } catch (error) {
+      console.error("Error fetching store details:", error);
+    }
+  };
 
   const fetchProducts = async (storeSlug: string) => {
     try {

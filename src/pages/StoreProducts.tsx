@@ -4,30 +4,40 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Star, SlidersHorizontal, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { API_BASE_URL } from "@/config/api";
 
-const allProducts = [
-  { id: 1, name: "Classic Blue Dress", price: 89.99, category: "Fashion", rating: 4.8, img: "👗" },
-  { id: 2, name: "Wireless Earbuds Pro", price: 49.99, category: "Electronics", rating: 4.9, img: "🎧" },
-  { id: 3, name: "Leather Crossbody Bag", price: 129.99, category: "Accessories", rating: 4.7, img: "👜" },
-  { id: 4, name: "Running Sneakers", price: 79.99, category: "Footwear", rating: 4.5, img: "👟" },
-  { id: 5, name: "Smartwatch Elite", price: 199.99, category: "Electronics", rating: 4.6, img: "⌚" },
-  { id: 6, name: "Organic Face Cream", price: 34.99, category: "Beauty", rating: 4.4, img: "🧴" },
-  { id: 7, name: "Cotton T-Shirt Pack", price: 24.99, category: "Fashion", rating: 4.3, img: "👕" },
-  { id: 8, name: "Yoga Mat Premium", price: 44.99, category: "Sports", rating: 4.8, img: "🧘" },
-  { id: 9, name: "Sunglasses Classic", price: 59.99, category: "Accessories", rating: 4.2, img: "🕶️" },
-  { id: 10, name: "Ceramic Mug Set", price: 19.99, category: "Home", rating: 4.6, img: "☕" },
-  { id: 11, name: "Backpack Pro", price: 69.99, category: "Accessories", rating: 4.7, img: "🎒" },
-  { id: 12, name: "Candle Collection", price: 29.99, category: "Home", rating: 4.5, img: "🕯️" },
-];
+// Removed static allProducts
 
 const categories = ["All", "Fashion", "Electronics", "Accessories", "Footwear", "Beauty", "Sports", "Home"];
 
 export default function StoreProducts() {
+  const { slug } = useParams();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCat, setSelectedCat] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
 
-  const filtered = allProducts.filter((p) => selectedCat === "All" || p.category === selectedCat);
+  useEffect(() => {
+    if (slug) fetchProducts(slug);
+  }, [slug]);
+
+  const fetchProducts = async (storeSlug: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/store/${storeSlug}`);
+      const data = await response.json();
+      if (response.ok) {
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = products.filter((p) => selectedCat === "All" || p.category === selectedCat);
 
   return (
     <StoreLayout>
@@ -68,10 +78,24 @@ export default function StoreProducts() {
             </div>
 
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filtered.map((p, i) => (
-                <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Link to={`/store/my-store/product/${p.id}`} className="block bg-card rounded-xl border border-border overflow-hidden hover-lift group">
-                    <div className="h-48 bg-muted flex items-center justify-center text-6xl group-hover:scale-105 transition-transform">{p.img}</div>
+              {loading ? (
+                <div className="col-span-full flex justify-center py-20">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="col-span-full text-center py-20 bg-muted/30 rounded-3xl border-2 border-dashed border-border">
+                  <p className="text-muted-foreground font-medium">No products found in this category.</p>
+                </div>
+              ) : filtered.map((p, i) => (
+                <motion.div key={p._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <Link to={`/store/${slug}/product/${p._id}`} className="block bg-card rounded-xl border border-border overflow-hidden hover-lift group">
+                    <div className="h-48 bg-muted flex items-center justify-center overflow-hidden">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <span className="text-6xl">📦</span>
+                      )}
+                    </div>
                     <div className="p-4">
                       <p className="text-xs text-muted-foreground mb-1">{p.category}</p>
                       <h3 className="font-medium text-sm mb-1">{p.name}</h3>
