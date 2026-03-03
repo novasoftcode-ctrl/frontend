@@ -99,7 +99,6 @@ export default function StoreFront() {
   };
 
   const toggleFavorite = (productId: string) => {
-    // ... same as before ...
     let newFavs;
     if (favorites.includes(productId)) {
       newFavs = favorites.filter(id => id !== productId);
@@ -112,7 +111,36 @@ export default function StoreFront() {
     localStorage.setItem("user_favorites", JSON.stringify(newFavs));
   };
 
-  // ... rest of the component until return ...
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingOrder(true);
+    try {
+      const storeDataStr = localStorage.getItem("vendor_store_data");
+      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
+
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: selectedProduct._id,
+          storeId: storeData._id,
+          ...orderData
+        })
+      });
+
+      if (response.ok) {
+        toast({ title: "Order Placed!", description: "The store owner will contact you soon." });
+        setOrderModalOpen(false);
+        setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
+      } else {
+        throw new Error("Failed to place order");
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmittingOrder(false);
+    }
+  };
 
   return (
     <StoreLayout>
