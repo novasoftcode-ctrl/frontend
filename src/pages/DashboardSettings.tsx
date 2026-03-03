@@ -11,7 +11,8 @@ export default function DashboardSettings() {
   const [storeData, setStoreData] = useState({
     name: "My Awesome Store",
     description: "Welcome to my store!",
-    email: "john@example.com"
+    email: "john@example.com",
+    slug: ""
   });
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function DashboardSettings() {
       updatedData.name = parsedStore.name || updatedData.name;
       updatedData.description = parsedStore.description || updatedData.description;
       updatedData.email = parsedStore.email || updatedData.email;
+      updatedData.slug = parsedStore.slug || "";
     } else if (savedAccount) {
       const parsedAccount = JSON.parse(savedAccount);
       updatedData.email = parsedAccount.email || updatedData.email;
@@ -38,21 +40,24 @@ export default function DashboardSettings() {
       const parsedStore = JSON.parse(savedStore);
       parsedStore.name = storeData.name;
       parsedStore.description = storeData.description;
+      parsedStore.email = storeData.email;
       localStorage.setItem("vendor_store_data", JSON.stringify(parsedStore));
-      localStorage.setItem("vendor_store_name", JSON.stringify(storeData.name));
-    }
-
-    // Update account data in localStorage
-    const savedAccount = localStorage.getItem("user_account_data");
-    if (savedAccount) {
-      const parsedAccount = JSON.parse(savedAccount);
-      parsedAccount.email = storeData.email;
-      localStorage.setItem("user_account_data", JSON.stringify(parsedAccount));
+      localStorage.setItem("vendor_store_name", storeData.name);
     }
 
     toast({
       title: "Settings Saved",
       description: "Your store settings have been updated successfully.",
+    });
+  };
+
+  const copyStoreUrl = () => {
+    const slug = storeData.slug || storeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const url = `https://prismzone.vercel.app/store/${slug}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "URL Copied",
+      description: "Store link copied to clipboard!",
     });
   };
 
@@ -93,7 +98,16 @@ export default function DashboardSettings() {
               </div>
               <div>
                 <Label>Store URL</Label>
-                <Input value={`https://prism-zone.netlify.app/store/${storeData.name.toLowerCase().replace(/\s+/g, '-')}`} readOnly className="mt-1.5 bg-muted font-mono text-xs cursor-not-allowed" />
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    value={`https://prismzone.vercel.app/store/${storeData.slug || storeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')}`}
+                    readOnly
+                    className="bg-muted font-mono text-xs cursor-not-allowed flex-1"
+                  />
+                  <Button variant="outline" size="sm" onClick={copyStoreUrl}>
+                    Copy
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label>Contact Email</Label>
