@@ -5,61 +5,94 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/api";
 
 export default function DashboardSettings() {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [storeData, setStoreData] = useState({
-    name: "My Awesome Store",
-    description: "Welcome to my store!",
-    email: "john@example.com",
+    name: "",
+    description: "",
+    email: "",
+    address: "",
+    phone: "",
     slug: ""
   });
 
   useEffect(() => {
-    const savedStore = localStorage.getItem("vendor_store_data");
-    const savedAccount = localStorage.getItem("user_account_data");
-
-    let updatedData = { ...storeData };
-    if (savedStore) {
-      const parsedStore = JSON.parse(savedStore);
-      updatedData.name = parsedStore.name || updatedData.name;
-      updatedData.description = parsedStore.description || updatedData.description;
-      updatedData.email = parsedStore.email || updatedData.email;
-      updatedData.slug = parsedStore.slug || "";
-    } else if (savedAccount) {
-      const parsedAccount = JSON.parse(savedAccount);
-      updatedData.email = parsedAccount.email || updatedData.email;
-    }
-    setStoreData(updatedData);
+    fetchStoreData();
   }, []);
 
-  const handleSave = () => {
-    // Update store data in localStorage
-    const savedStore = localStorage.getItem("vendor_store_data");
-    if (savedStore) {
-      const parsedStore = JSON.parse(savedStore);
-      parsedStore.name = storeData.name;
-      parsedStore.description = storeData.description;
-      parsedStore.email = storeData.email;
-      localStorage.setItem("vendor_store_data", JSON.stringify(parsedStore));
-      localStorage.setItem("vendor_store_name", storeData.name);
+  const fetchStoreData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/api/store/view/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setStoreData({
+          name: data.name || "",
+          description: data.description || "",
+          email: data.email || "",
+          address: data.address || "",
+          phone: data.phone || "",
+          slug: data.slug || ""
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching store settings:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    toast({
-      title: "Settings Saved",
-      description: "Your store settings have been updated successfully.",
-    });
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/api/store/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          description: storeData.description,
+          address: storeData.address,
+          phone: storeData.phone,
+          email: storeData.email
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Settings Saved",
+          description: "Your store settings have been updated successfully.",
+        });
+        // Update local cache for dashboard layout consistency
+        localStorage.setItem("vendor_store_data", JSON.stringify(await response.json()));
+      } else {
+        throw new Error("Failed to update settings");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const copyStoreUrl = () => {
-    const slug = storeData.slug || storeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-    const url = `https://prismzone.vercel.app/store/${slug}`;
+    const url = `https://prismzone.vercel.app/store/${storeData.slug}`;
     navigator.clipboard.writeText(url);
     toast({
       title: "URL Copied",
       description: "Store link copied to clipboard!",
     });
   };
+
+  if (loading) return <DashboardLayout><div>Loading settings...</div></DashboardLayout>;
 
   return (
     <DashboardLayout>
@@ -96,11 +129,37 @@ export default function DashboardSettings() {
                   onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Phone Number</Label>
+                  <Input
+                    value={storeData.phone}
+                    onChange={(e) => setStoreData({ ...storeData, phone: e.target.value })}
+                    className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <Label>Contact Email</Label>
+                  <Input
+                    value={storeData.email}
+                    onChange={(e) => setStoreData({ ...storeData, email: e.target.value })}
+                    className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Store Address</Label>
+                <Input
+                  value={storeData.address}
+                  onChange={(e) => setStoreData({ ...storeData, address: e.target.value })}
+                  className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
+                />
+              </div>
               <div>
                 <Label>Store URL</Label>
                 <div className="flex gap-2 mt-1.5">
                   <Input
-                    value={`https://prismzone.vercel.app/store/${storeData.slug || storeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')}`}
+                    value={`https://prismzone.vercel.app/store/${storeData.slug}`}
                     readOnly
                     className="bg-muted font-mono text-xs cursor-not-allowed flex-1"
                   />
@@ -108,14 +167,6 @@ export default function DashboardSettings() {
                     Copy
                   </Button>
                 </div>
-              </div>
-              <div>
-                <Label>Contact Email</Label>
-                <Input
-                  value={storeData.email}
-                  onChange={(e) => setStoreData({ ...storeData, email: e.target.value })}
-                  className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
-                />
               </div>
               <Button onClick={handleSave} className="gradient-bg border-0 text-primary-foreground">Save Changes</Button>
             </div>

@@ -55,7 +55,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
             const data = await response.json();
             setStoreData(data);
-            localStorage.setItem("vendor_store_data", JSON.stringify(data));
         } catch (err: any) {
             setError(err.message);
             setStoreData(null);

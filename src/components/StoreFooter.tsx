@@ -1,21 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { Store, Facebook, Instagram, Mail, Phone, MapPin, ArrowUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useStore } from "@/contexts/StoreContext";
 
 export default function StoreFooter() {
     const { slug } = useParams();
-    const [storeData, setStoreData] = useState<any>(null);
-
-    useEffect(() => {
-        const saved = localStorage.getItem("vendor_store_data");
-        if (saved) {
-            try {
-                setStoreData(JSON.parse(saved));
-            } catch (e) {
-                console.error("Error parsing store data", e);
-            }
-        }
-    }, [slug]);
+    const { storeData } = useStore();
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });

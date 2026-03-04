@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setStoreName(parsed.name);
         setStoreLogo(parsed.logoUrl || null);
         setUserInitial(parsed.name.charAt(0).toUpperCase());
-        setStoreSlug(parsed.name.toLowerCase().replace(/\s+/g, '-'));
+        setStoreSlug(parsed.slug || parsed.name.toLowerCase().replace(/\s+/g, '-'));
       }
     }
 
