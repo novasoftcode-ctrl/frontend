@@ -24,6 +24,27 @@ export default function TrackOrder() {
     const [searched, setSearched] = useState(false);
     const { toast } = useToast();
 
+    const handleTrack = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!identifier.trim()) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/orders/track/${identifier.trim()}`);
+            const data = await response.json();
+            if (response.ok) {
+                setOrders(data);
+                setSearched(true);
+                if (data.length === 0) {
+                    toast({ title: "No Orders Found", description: "No orders found for this email/phone." });
+                }
+            }
+        } catch (error) {
+            toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleCancel = async (orderId: string) => {
         if (!window.confirm("Are you sure you want to cancel this order? It will be removed immediately.")) return;
 
