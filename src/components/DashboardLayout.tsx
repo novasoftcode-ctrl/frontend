@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/config/api";
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -45,10 +46,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const fetchVendorData = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("prismzone_token");
       if (!token) return;
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/store/view/me`, {
+      const response = await fetch(`${API_BASE_URL}/api/store/view/me`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

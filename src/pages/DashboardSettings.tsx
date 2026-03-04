@@ -25,7 +25,7 @@ export default function DashboardSettings() {
 
   const fetchStoreData = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("prismzone_token");
       const response = await fetch(`${API_BASE_URL}/api/store/view/me`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -49,7 +49,7 @@ export default function DashboardSettings() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("prismzone_token");
       const response = await fetch(`${API_BASE_URL}/api/store/update`, {
         method: "PUT",
         headers: {
