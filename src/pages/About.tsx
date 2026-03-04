@@ -89,6 +89,38 @@ export default function About() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Team Section */}
+                    <div className="mb-20">
+                        <h2 className="text-4xl md:text-5xl font-heading font-black text-center mb-16 tracking-tighter">Our Core Team</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+                            {[
+                                { name: "Zarkhman Rasheed", role: "CEO and Founder", img: "/image1.png" },
+                                { name: "Saqib Ali", role: "Chief Financial Officer", img: "/image2.png" },
+                                { name: "Jibran Ali", role: "Chief Operating Officer", img: "/image3.png" }
+                            ].map((member, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="text-center group"
+                                >
+                                    <div className="relative mb-6 inline-block">
+                                        <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-primary/10 group-hover:border-primary/30 transition-colors shadow-xl mx-auto">
+                                            <img
+                                                src={member.img}
+                                                alt={member.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        </div>
+                                    </div>
+                                    <h3 className="text-2xl font-black mb-1 tracking-tight">{member.name}</h3>
+                                    <p className="text-primary font-bold text-sm uppercase tracking-wider">{member.role}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 

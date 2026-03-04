@@ -56,7 +56,10 @@ export default function Index() {
               🚀 Trusted by 12,000+ vendors worldwide
             </span>
           </motion.div>
-          <motion.h1 variants={fadeUp} custom={1} initial="hidden" animate="visible" className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-primary-foreground max-w-4xl mx-auto leading-tight">
+          <motion.h2 variants={fadeUp} custom={1} initial="hidden" animate="visible" className="text-5xl md:text-7xl lg:text-8xl font-heading font-black text-primary-foreground max-w-4xl mx-auto leading-tight mb-2">
+            Welcome to PrismZone
+          </motion.h2>
+          <motion.h1 variants={fadeUp} custom={1.5} initial="hidden" animate="visible" className="text-3xl md:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground/90 max-w-4xl mx-auto leading-tight">
             Create Your Digital Storefront{" "}
             <span className="text-accent">in Minutes</span>
           </motion.h1>
@@ -66,6 +69,9 @@ export default function Index() {
           <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible" className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 text-base px-8" asChild>
               <Link to="/stores">Explore Stores <ArrowRight className="ml-2 w-4 h-4" /></Link>
+            </Button>
+            <Button size="lg" variant="outline" className="bg-white/10 text-primary-foreground border-primary-foreground/20 hover:bg-white/20 text-base px-8" asChild>
+              <Link to="/signup">Create Store <Store className="ml-2 w-4 h-4" /></Link>
             </Button>
           </motion.div>
         </div>
