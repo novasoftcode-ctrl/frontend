@@ -6,15 +6,10 @@ import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-export default function StoreContact() {
-  const [storeData, setStoreData] = useState<any>(null);
+import { useStore } from "@/contexts/StoreContext";
 
-  useEffect(() => {
-    const saved = localStorage.getItem("vendor_store_data");
-    if (saved) {
-      setStoreData(JSON.parse(saved));
-    }
-  }, []);
+export default function StoreContact() {
+  const { storeData } = useStore();
 
   const officeHours = storeData?.officeHours ? (
     typeof storeData.officeHours === 'string' ? JSON.parse(storeData.officeHours) : storeData.officeHours

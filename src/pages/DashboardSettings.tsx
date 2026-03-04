@@ -93,7 +93,7 @@ export default function DashboardSettings() {
 
   const copyStoreUrl = () => {
     if (!storeData.slug) return;
-    const url = `https://prismzone.vercel.app/store/${storeData.slug}`;
+    const url = `${window.location.origin}/store/${storeData.slug}`;
     navigator.clipboard.writeText(url);
     toast({
       title: "URL Copied",
@@ -136,7 +136,7 @@ export default function DashboardSettings() {
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Store URL</Label>
                     <div className="flex gap-2">
                       <Input
-                        value={`https://prismzone.vercel.app/store/${storeData.slug}`}
+                        value={`${window.location.origin}/store/${storeData.slug || ""}`}
                         disabled
                         className="h-12 bg-muted/30 border-dashed cursor-not-allowed font-mono text-xs text-slate-500 flex-1"
                       />

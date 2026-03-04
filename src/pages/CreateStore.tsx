@@ -413,8 +413,8 @@ export default function CreateStore() {
               </motion.div>
               <h2 className="text-2xl font-heading font-bold mb-2 text-foreground">🎉 Your Store is Live!</h2>
               <p className="text-muted-foreground text-sm mb-6">Congratulations! Your store <span className="text-primary font-bold">"{formData.name}"</span> has been created successfully.</p>
-              <div className="bg-muted rounded-xl p-4 flex items-center justify-between mb-6 shadow-inner">
-                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1">
+              <div className="bg-muted rounded-xl p-4 flex items-center justify-between mb-6 shadow-inner overflow-hidden">
+                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1 truncate mr-2">
                   {window.location.origin}/store/{JSON.parse(localStorage.getItem("vendor_store_data") || "{}").slug || "my-store"}
                 </span>
                 <Button
@@ -432,8 +432,13 @@ export default function CreateStore() {
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="w-32 h-32 bg-white border-2 border-muted rounded-2xl mx-auto mb-8 flex items-center justify-center shadow-lg">
-                <QrCode className="w-20 h-20 text-muted-foreground" />
+              <div className="w-40 h-40 bg-white border-2 border-muted rounded-2xl mx-auto mb-8 flex items-center justify-center shadow-lg overflow-hidden">
+                {(() => {
+                  const slug = JSON.parse(localStorage.getItem("vendor_store_data") || "{}").slug || "my-store";
+                  const storeUrl = `${window.location.origin}/store/${slug}`;
+                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(storeUrl)}`;
+                  return <img src={qrUrl} alt="Store QR Code" className="w-32 h-32" />;
+                })()}
               </div>
               <Button className="w-full h-12 gradient-bg border-0 text-primary-foreground font-black text-lg shadow-xl hover:shadow-primary/20 transition-all" asChild>
                 <Link to="/dashboard">Go to Your Dashboard <ArrowRight className="ml-2 w-5 h-5" /></Link>
