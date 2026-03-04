@@ -16,7 +16,12 @@ export default function DashboardSettings() {
     email: "",
     address: "",
     phone: "",
-    slug: ""
+    slug: "",
+    notifications: {
+      newOrder: true,
+      lowStock: true,
+      newCustomer: true
+    }
   });
 
   useEffect(() => {
@@ -37,7 +42,8 @@ export default function DashboardSettings() {
           email: data.email || "",
           address: data.address || "",
           phone: data.phone || "",
-          slug: data.slug || ""
+          slug: data.slug || "",
+          notifications: data.notifications || { newOrder: true, lowStock: true, newCustomer: true }
         });
       }
     } catch (error) {
@@ -60,7 +66,8 @@ export default function DashboardSettings() {
           description: storeData.description,
           address: storeData.address,
           phone: storeData.phone,
-          email: storeData.email
+          email: storeData.email,
+          notifications: storeData.notifications
         })
       });
 
@@ -77,7 +84,8 @@ export default function DashboardSettings() {
           email: result.store.email || "",
           address: result.store.address || "",
           phone: result.store.phone || "",
-          slug: result.store.slug || ""
+          slug: result.store.slug || "",
+          notifications: result.store.notifications || { newOrder: true, lowStock: true, newCustomer: true }
         });
       } else {
         throw new Error(result.message || "Failed to update settings");
@@ -227,15 +235,32 @@ export default function DashboardSettings() {
           <TabsContent value="notifications" className="mt-6">
             <div className="bg-card rounded-xl border border-border p-6 space-y-3">
               <h3 className="font-heading font-semibold mb-2">Email Notifications</h3>
-              {["New Order", "Order Shipped", "Low Stock Alert", "New Customer"].map((n) => (
-                <div key={n} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                  <span className="text-sm">{n}</span>
+              {[
+                { label: "New Order", key: "newOrder" },
+                { label: "Low Stock Alert", key: "lowStock" },
+                { label: "New Customer", key: "newCustomer" }
+              ].map((n) => (
+                <div key={n.key} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <span className="text-sm">{n.label}</span>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked className="sr-only peer" />
+                    <input
+                      type="checkbox"
+                      checked={(storeData.notifications as any)[n.key]}
+                      onChange={(e) => setStoreData({
+                        ...storeData,
+                        notifications: { ...storeData.notifications, [n.key]: e.target.checked }
+                      })}
+                      className="sr-only peer"
+                    />
                     <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-card after:rounded-full after:transition-all peer-checked:after:translate-x-4" />
                   </label>
                 </div>
               ))}
+              <div className="pt-4 border-t border-border">
+                <Button onClick={handleSave} className="gradient-bg border-0 text-white font-bold h-10 px-6 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95">
+                  Update Preferences
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

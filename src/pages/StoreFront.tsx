@@ -107,7 +107,7 @@ export default function StoreFront() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: selectedProduct._id,
-          storeId: storeData._id,
+          storeId: storeData?._id,
           ...orderData
         })
       });
