@@ -73,15 +73,9 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative group">
-              <Search className="absolute left-4 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="pl-11 w-48 xl:w-64 h-11 rounded-full bg-slate-100 border-0 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all font-medium"
-              />
-            </form>
+            <Button variant="outline" className="hidden lg:flex rounded-full border-primary/20 text-primary hover:bg-primary/5 font-bold h-11" asChild>
+              <Link to={`/store/${slug}/track`}><Search className="w-4 h-4 mr-2" /> Track Order</Link>
+            </Button>
 
             <Button variant="outline" className="hidden lg:flex rounded-full border-primary/20 text-primary hover:bg-primary/5 font-bold h-11" asChild>
               <Link to="/stores"><Compass className="w-4 h-4 mr-2" /> Explore Stores</Link>

@@ -9,17 +9,17 @@ const stats = [
   { title: "Total Users", value: "24,580", icon: Users, change: "+15%" },
   { title: "Active Stores", value: "12,340", icon: Store, change: "+8%" },
   { title: "Total Products", value: "567K", icon: Package, change: "+22%" },
-  { title: "Platform Revenue", value: "$2.4M", icon: DollarSign, change: "+18%" },
+  { title: "Platform Revenue", value: "Rs. 2.4M", icon: DollarSign, change: "+18%" },
 ];
 
 const registeredStores = [
-  { name: "Fashion Hub", owner: "Sarah J.", email: "sarah@fashionhub.com", status: "Active", products: 120, revenue: "$45,200", joined: "Jan 12, 2026", category: "Apparel" },
-  { name: "Tech Zone", owner: "Mike C.", email: "mike@techzone.io", status: "Active", products: 85, revenue: "$128,500", joined: "Dec 05, 2025", category: "Electronics" },
-  { name: "Beauty Bar", owner: "Anna K.", email: "anna@beautybar.co", status: "Under Review", products: 64, revenue: "$12,300", joined: "Feb 18, 2026", category: "Cosmetics" },
-  { name: "Sport Central", owner: "James L.", email: "james@sportscentral.net", status: "Active", products: 45, revenue: "$8,900", joined: "Nov 22, 2025", category: "Fitness" },
-  { name: "GadgetMaster", owner: "Robert D.", email: "robert@gadget.com", status: "Active", products: 210, revenue: "$95,000", joined: "Jan 30, 2026", category: "Electronics" },
-  { name: "Eco Living", owner: "Elena S.", email: "elena@ecoliving.org", status: "Suspended", products: 32, revenue: "$4,100", joined: "Feb 02, 2026", category: "Home" },
-  { name: "Urban Kicks", owner: "David W.", email: "david@urbankicks.com", status: "Active", products: 76, revenue: "$22,400", joined: "Jan 15, 2026", category: "Footwear" },
+  { name: "Fashion Hub", owner: "Sarah J.", email: "sarah@fashionhub.com", status: "Active", products: 120, revenue: "Rs. 45,200", joined: "Jan 12, 2026", category: "Apparel" },
+  { name: "Tech Zone", owner: "Mike C.", email: "mike@techzone.io", status: "Active", products: 85, revenue: "Rs. 128,500", joined: "Dec 05, 2025", category: "Electronics" },
+  { name: "Beauty Bar", owner: "Anna K.", email: "anna@beautybar.co", status: "Under Review", products: 64, revenue: "Rs. 12,300", joined: "Feb 18, 2026", category: "Cosmetics" },
+  { name: "Sport Central", owner: "James L.", email: "james@sportscentral.net", status: "Active", products: 45, revenue: "Rs. 8,900", joined: "Nov 22, 2025", category: "Fitness" },
+  { name: "GadgetMaster", owner: "Robert D.", email: "robert@gadget.com", status: "Active", products: 210, revenue: "Rs. 95,000", joined: "Jan 30, 2026", category: "Electronics" },
+  { name: "Eco Living", owner: "Elena S.", email: "elena@ecoliving.org", status: "Suspended", products: 32, revenue: "Rs. 4,100", joined: "Feb 02, 2026", category: "Home" },
+  { name: "Urban Kicks", owner: "David W.", email: "david@urbankicks.com", status: "Active", products: 76, revenue: "Rs. 22,400", joined: "Jan 15, 2026", category: "Footwear" },
 ];
 
 const issues = [

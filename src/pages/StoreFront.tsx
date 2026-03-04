@@ -158,14 +158,18 @@ export default function StoreFront() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button size="lg" className="bg-primary text-white hover:bg-primary/90 font-bold px-12 h-16 rounded-full text-xl shadow-2xl transition-all hover:scale-105" asChild>
+            <Button size="lg" className="w-full sm:w-auto bg-primary text-white hover:bg-primary/90 font-bold px-12 h-16 rounded-full text-xl shadow-2xl transition-all hover:scale-105" asChild>
               <Link to={`/store/${slug}/products`}>Shop Now <ArrowRight className="ml-2 w-6 h-6" /></Link>
+            </Button>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-md text-white border-white/20 hover:bg-white/20 font-bold px-12 h-16 rounded-full text-xl shadow-2xl transition-all hover:scale-105" asChild>
+              <Link to={`/store/${slug}/track`}>Track Order <Search className="ml-2 w-6 h-6" /></Link>
             </Button>
           </motion.div>
         </div>
         {/* Subtle decorative overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40 pointer-events-none" />
       </section>
 
       {/* Categories */}
@@ -208,7 +212,7 @@ export default function StoreFront() {
               <p className="text-muted-foreground font-medium text-lg">No products available at the moment.</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.slice(0, 8).map((p) => (
                 <motion.div
                   key={p._id}

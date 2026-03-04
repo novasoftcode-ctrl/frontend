@@ -140,7 +140,7 @@ export default function Products() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="text-lg font-heading font-bold">${p.price}</div>
+                    <div className="text-lg font-heading font-bold">Rs. {p.price}</div>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-muted-foreground">Stock: {p.stock}</span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stockStatus[status]}`}>{status}</span>
@@ -175,7 +175,7 @@ export default function Products() {
                         </div>
                         <span className="font-medium">{p.name}</span>
                       </td>
-                      <td className="p-4 font-medium">${p.price}</td>
+                      <td className="p-4 font-medium">Rs. {p.price}</td>
                       <td className="p-4">{p.stock}</td>
                       <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${stockStatus[status]}`}>{status}</span></td>
                       <td className="p-4"><DropdownMenu>

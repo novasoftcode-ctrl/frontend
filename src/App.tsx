@@ -28,6 +28,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
 import ExploreStores from "./pages/ExploreStores";
+import TrackOrder from "./pages/TrackOrder";
 import AdminDashboard from "./pages/AdminDashboard";
 import { StoreProvider } from "./contexts/StoreContext";
 import About from "./pages/About";
@@ -93,6 +94,7 @@ const App = () => (
                   <Route path="product/:id" element={<ProductDetail />} />
                   <Route path="about" element={<StoreAbout />} />
                   <Route path="contact" element={<StoreContact />} />
+                  <Route path="track" element={<TrackOrder />} />
                 </Routes>
               </StoreProvider>
             } />

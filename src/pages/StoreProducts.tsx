@@ -175,7 +175,7 @@ export default function StoreProducts() {
                 <p className="text-muted-foreground font-medium text-lg">No products found matching your criteria.</p>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filtered.map((p, i) => (
                   <motion.div
                     key={p._id}
