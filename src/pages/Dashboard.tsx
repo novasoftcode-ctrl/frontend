@@ -45,7 +45,7 @@ export default function Dashboard() {
       const orders = await orderRes.json();
 
       if (prodRes.ok && orderRes.ok) {
-        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.product?.price || 0), 0);
+        const totalRevenue = orders.reduce((sum: number, o: any) => sum + ((o.product?.price || 0) * (o.quantity || 1)), 0);
 
         setStats([
           { title: "Total Products", value: products.length.toString(), change: "Live", icon: Package, up: true },
