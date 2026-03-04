@@ -24,24 +24,25 @@ export default function TrackOrder() {
     const [searched, setSearched] = useState(false);
     const { toast } = useToast();
 
-    const handleTrack = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!identifier.trim()) return;
-        setLoading(true);
+    const handleCancel = async (orderId: string) => {
+        if (!window.confirm("Are you sure you want to cancel this order? It will be removed immediately.")) return;
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/orders/track/${identifier.trim()}`);
+            const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/cancel`, {
+                method: "DELETE"
+            });
             const data = await response.json();
             if (response.ok) {
-                setOrders(data);
-                setSearched(true);
-                if (data.length === 0) {
-                    toast({ title: "No Orders Found", description: "No orders found for this email/phone." });
-                }
+                toast({ title: "Order Cancelled", description: "Your order has been cancelled and removed." });
+                // Re-track to refresh list
+                const trackResponse = await fetch(`${API_BASE_URL}/api/orders/track/${identifier.trim()}`);
+                const trackData = await trackResponse.json();
+                if (trackResponse.ok) setOrders(trackData);
+            } else {
+                toast({ title: "Error", description: data.message || "Failed to cancel order", variant: "destructive" });
             }
         } catch (error) {
-            toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
-        } finally {
-            setLoading(false);
+            toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
         }
     };
 
@@ -125,6 +126,19 @@ export default function TrackOrder() {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {order.status !== 'Cancelled' && (
+                                                <div className="mt-8 flex justify-end">
+                                                    <Button
+                                                        variant="destructive"
+                                                        className="rounded-xl font-bold px-6 h-11"
+                                                        disabled={order.status === 'Delivered'}
+                                                        onClick={() => handleCancel(order._id)}
+                                                    >
+                                                        Cancel Order
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </motion.div>
                                 );

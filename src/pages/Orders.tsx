@@ -41,7 +41,12 @@ export default function Orders() {
     }
   };
 
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+  const [statusMap, setStatusMap] = useState<Record<string, string>>({});
+
+  const handleStatusUpdate = async (orderId: string) => {
+    const newStatus = statusMap[orderId];
+    if (!newStatus) return;
+
     try {
       const token = localStorage.getItem("prismzone_token");
       const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
@@ -117,25 +122,25 @@ export default function Orders() {
                     <td className="p-4">{o.quantity}</td>
                     <td className="p-4 font-medium italic text-primary">Rs. {o.product?.price * (o.quantity || 1)}</td>
                     <td className="p-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${sc[o.status]}`}>{o.status}</span>
+                      <select
+                        className={`text-xs font-medium px-2 py-1 rounded-md border border-border focus:ring-1 focus:ring-primary outline-none ${sc[statusMap[o._id] || o.status]}`}
+                        value={statusMap[o._id] || o.status}
+                        onChange={(e) => setStatusMap(prev => ({ ...prev, [o._id]: e.target.value }))}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
                     </td>
                     <td className="p-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">Update Status</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(o._id, 'Pending')} className="flex items-center">
-                            <Clock className="w-3.5 h-3.5 mr-2 text-muted-foreground" /> Pending
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(o._id, 'Delivered')} className="flex items-center">
-                            <CheckCircle className="w-3.5 h-3.5 mr-2 text-success" /> Delivered
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(o._id, 'Cancelled')} className="flex items-center">
-                            <XCircle className="w-3.5 h-3.5 mr-2 text-destructive" /> Cancelled
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStatusUpdate(o._id)}
+                        disabled={!statusMap[o._id] || statusMap[o._id] === o.status}
+                      >
+                        Update Status
+                      </Button>
                     </td>
                   </tr>
                 ))}
