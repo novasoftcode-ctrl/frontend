@@ -99,9 +99,6 @@ export default function StoreFront() {
     e.preventDefault();
     setSubmittingOrder(true);
     try {
-      const storeDataStr = localStorage.getItem("vendor_store_data");
-      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
-
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
