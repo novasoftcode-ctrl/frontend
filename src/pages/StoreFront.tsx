@@ -11,11 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { API_BASE_URL } from "@/config/api";
 
+import { useStore } from "@/contexts/StoreContext";
+
 export default function StoreFront() {
   const { slug } = useParams();
-  const normalizedSlug = slug?.toLowerCase();
-  const [storeName, setStoreName] = useState("My Store");
-  const [storeCover, setStoreCover] = useState<string | null>(null);
+  const { storeData, loading: storeLoading } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -51,34 +51,18 @@ export default function StoreFront() {
   const [submittingOrder, setSubmittingOrder] = useState(false);
   const { toast } = useToast();
 
+  const storeName = storeData?.name || "My Store";
+  const storeCover = storeData?.coverUrl || null;
+
   useEffect(() => {
     if (slug) {
       const cleanSlug = slug.trim().toLowerCase();
-      fetchStoreDetails(cleanSlug);
       fetchProducts(cleanSlug);
     }
 
     const savedFavs = localStorage.getItem("user_favorites");
     if (savedFavs) setFavorites(JSON.parse(savedFavs));
   }, [slug]);
-
-  const fetchStoreDetails = async (storeSlug: string) => {
-    try {
-      console.log(`[StoreFront] Fetching store details for: ${storeSlug}`);
-      const response = await fetch(`${API_BASE_URL}/api/store/${storeSlug}`);
-      const data = await response.json();
-      if (response.ok) {
-        console.log(`[StoreFront] Store details loaded:`, data);
-        setStoreName(data.name);
-        setStoreCover(data.coverUrl);
-        localStorage.setItem("vendor_store_data", JSON.stringify(data));
-      } else {
-        console.error(`[StoreFront] Failed to fetch store details:`, data.message);
-      }
-    } catch (error) {
-      console.error("[StoreFront] Error in fetchStoreDetails:", error);
-    }
-  };
 
   const fetchProducts = async (storeSlug: string) => {
     try {

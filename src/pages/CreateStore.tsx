@@ -414,14 +414,17 @@ export default function CreateStore() {
               <h2 className="text-2xl font-heading font-bold mb-2 text-foreground">🎉 Your Store is Live!</h2>
               <p className="text-muted-foreground text-sm mb-6">Congratulations! Your store <span className="text-primary font-bold">"{formData.name}"</span> has been created successfully.</p>
               <div className="bg-muted rounded-xl p-4 flex items-center justify-between mb-6 shadow-inner">
-                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1">https://prismzone.vercel.app/store/{formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store'}</span>
+                <span className="text-xs font-mono font-bold text-muted-foreground tracking-tight line-clamp-1">
+                  {window.location.origin}/store/{JSON.parse(localStorage.getItem("vendor_store_data") || "{}").slug || "my-store"}
+                </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="hover:bg-primary/10 hover:text-primary transition-colors flex-shrink-0"
                   onClick={() => {
-                    const slug = formData.name.toLowerCase().replace(/\s+/g, '-') || 'my-store';
-                    const url = `https://prismzone.vercel.app/store/${slug}`;
+                    const storeData = JSON.parse(localStorage.getItem("vendor_store_data") || "{}");
+                    const slug = storeData.slug || "my-store";
+                    const url = `${window.location.origin}/store/${slug}`;
                     navigator.clipboard.writeText(url);
                     toast({ title: "Copied!", description: "Link copied to clipboard" });
                   }}

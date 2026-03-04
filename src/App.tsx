@@ -29,6 +29,7 @@ import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
 import ExploreStores from "./pages/ExploreStores";
 import AdminDashboard from "./pages/AdminDashboard";
+import { StoreProvider } from "./contexts/StoreContext";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
@@ -81,12 +82,21 @@ const App = () => (
             <Route path="/dashboard/customers" element={<Customers />} />
             <Route path="/dashboard/analytics" element={<Analytics />} />
             <Route path="/dashboard/settings" element={<DashboardSettings />} />
-            <Route path="/store/:slug" element={<StoreFront />} />
-            <Route path="/store/:slug/products" element={<StoreProducts />} />
-            <Route path="/store/:slug/favorites" element={<Favorites />} />
-            <Route path="/store/:slug/product/:id" element={<ProductDetail />} />
-            <Route path="/store/:slug/about" element={<StoreAbout />} />
-            <Route path="/store/:slug/contact" element={<StoreContact />} />
+
+            {/* Storefront Routes with Context */}
+            <Route path="/store/:slug/*" element={
+              <StoreProvider>
+                <Routes>
+                  <Route path="/" element={<StoreFront />} />
+                  <Route path="products" element={<StoreProducts />} />
+                  <Route path="favorites" element={<Favorites />} />
+                  <Route path="product/:id" element={<ProductDetail />} />
+                  <Route path="about" element={<StoreAbout />} />
+                  <Route path="contact" element={<StoreContact />} />
+                </Routes>
+              </StoreProvider>
+            } />
+
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />

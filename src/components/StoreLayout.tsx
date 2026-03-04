@@ -5,15 +5,18 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import StoreFooter from "@/components/StoreFooter";
+import { useStore } from "@/contexts/StoreContext";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   const { slug } = useParams();
+  const { storeData, loading, error } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [storeName, setStoreName] = useState("My Store");
-  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const storeName = storeData?.name || "My Store";
+  const storeLogo = storeData?.logoUrl || null;
 
   const storeNav = [
     { label: "Home", href: `/store/${slug}` },
@@ -22,18 +25,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     { label: "Contact", href: `/store/${slug}/contact` },
   ];
 
-  useEffect(() => {
-    const storeDataStr = localStorage.getItem("vendor_store_data");
-    if (storeDataStr) {
-      try {
-        const parsed = JSON.parse(storeDataStr);
-        if (parsed.logoUrl) setStoreLogo(parsed.logoUrl);
-        if (parsed.name) setStoreName(parsed.name);
-      } catch (e) {
-        console.error("Error parsing store data", e);
-      }
-    }
-  }, [slug]);
+  // Monitor loading state if needed, or just let it render with defaults
 
   const handleMonitorStore = () => {
     const savedAccount = localStorage.getItem("user_account_data");
