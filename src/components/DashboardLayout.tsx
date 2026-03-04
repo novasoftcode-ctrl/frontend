@@ -40,28 +40,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
-    const savedName = localStorage.getItem("vendor_store_name");
-    if (savedName) setStoreName(savedName);
-
-    // Get user/store name for formatting
-    const storeDataStr = localStorage.getItem("vendor_store_data");
-    const accountDataStr = localStorage.getItem("user_account_data");
-
-    if (storeDataStr) {
-      const parsed = JSON.parse(storeDataStr);
-      if (parsed.name) {
-        setStoreName(parsed.name);
-        setStoreLogo(parsed.logoUrl || null);
-        setUserInitial(parsed.name.charAt(0).toUpperCase());
-        setStoreSlug(parsed.slug || parsed.name.toLowerCase().replace(/\s+/g, '-'));
-      }
-    }
-
-    if (accountDataStr) {
-      const parsed = JSON.parse(accountDataStr);
-      if (parsed.name) setUserName(parsed.name);
-    }
+    fetchVendorData();
   }, []);
+
+  const fetchVendorData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/store/view/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStoreName(data.name || "My Store");
+        setStoreLogo(data.logoUrl || null);
+        setStoreSlug(data.slug || "");
+
+        if (data.owner && data.owner.fullName) {
+          setUserName(data.owner.fullName);
+          setUserInitial(data.owner.fullName.charAt(0).toUpperCase());
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching vendor dashboard data:", error);
+    }
+  };
 
   const dynamicMenuItems = menuItems.map(item => ({ ...item }));
 

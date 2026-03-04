@@ -64,15 +64,23 @@ export default function DashboardSettings() {
         })
       });
 
+      const result = await response.json();
       if (response.ok) {
         toast({
           title: "Settings Saved",
           description: "Your store settings have been updated successfully.",
         });
-        // Update local cache for dashboard layout consistency
-        localStorage.setItem("vendor_store_data", JSON.stringify(await response.json()));
+        // Update local state with the returned data
+        setStoreData({
+          name: result.store.name || "",
+          description: result.store.description || "",
+          email: result.store.email || "",
+          address: result.store.address || "",
+          phone: result.store.phone || "",
+          slug: result.store.slug || ""
+        });
       } else {
-        throw new Error("Failed to update settings");
+        throw new Error(result.message || "Failed to update settings");
       }
     } catch (error: any) {
       toast({
@@ -84,6 +92,7 @@ export default function DashboardSettings() {
   };
 
   const copyStoreUrl = () => {
+    if (!storeData.slug) return;
     const url = `https://prismzone.vercel.app/store/${storeData.slug}`;
     navigator.clipboard.writeText(url);
     toast({
@@ -103,72 +112,88 @@ export default function DashboardSettings() {
         </div>
 
         <Tabs defaultValue="general">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="shipping">Shipping</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger value="general" className="px-6">General</TabsTrigger>
+            <TabsTrigger value="payments" className="px-6">Payments</TabsTrigger>
+            <TabsTrigger value="shipping" className="px-6">Shipping</TabsTrigger>
+            <TabsTrigger value="notifications" className="px-6">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="mt-6">
-            <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-              <div>
-                <Label>Store Name</Label>
-                <Input
-                  value={storeData.name}
-                  readOnly
-                  className="mt-1.5 bg-muted cursor-not-allowed font-bold"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1">Store name is linked to your URL and cannot be changed.</p>
-              </div>
-              <div>
-                <Label>Store Description</Label>
-                <textarea
-                  className="mt-1.5 w-full rounded-lg border border-border bg-background p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary outline-none"
-                  value={storeData.description}
-                  onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Phone Number</Label>
-                  <Input
-                    value={storeData.phone}
-                    onChange={(e) => setStoreData({ ...storeData, phone: e.target.value })}
-                    className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
+            <div className="bg-card rounded-xl border border-border p-6 space-y-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Store Name</Label>
+                    <Input
+                      value={storeData.name}
+                      disabled
+                      className="h-12 bg-muted/30 border-dashed cursor-not-allowed font-bold text-slate-500"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-medium">Store name is permament and cannot be changed.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Store URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={`https://prismzone.vercel.app/store/${storeData.slug}`}
+                        disabled
+                        className="h-12 bg-muted/30 border-dashed cursor-not-allowed font-mono text-xs text-slate-500 flex-1"
+                      />
+                      <Button variant="outline" size="icon" onClick={copyStoreUrl} className="h-12 w-12 shrink-0">
+                        <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Store Description</Label>
+                  <textarea
+                    className="w-full rounded-xl border border-border bg-background p-4 text-sm min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    placeholder="Tell customers about your store..."
+                    value={storeData.description}
+                    onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
                   />
                 </div>
-                <div>
-                  <Label>Contact Email</Label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider">Phone Number</Label>
+                    <Input
+                      placeholder="+92 300 1234567"
+                      value={storeData.phone}
+                      onChange={(e) => setStoreData({ ...storeData, phone: e.target.value })}
+                      className="h-12 rounded-xl focus:ring-2 focus:ring-primary/20 border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider">Contact Email</Label>
+                    <Input
+                      placeholder="store@example.com"
+                      value={storeData.email}
+                      onChange={(e) => setStoreData({ ...storeData, email: e.target.value })}
+                      className="h-12 rounded-xl focus:ring-2 focus:ring-primary/20 border-border"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Store Address</Label>
                   <Input
-                    value={storeData.email}
-                    onChange={(e) => setStoreData({ ...storeData, email: e.target.value })}
-                    className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
+                    placeholder="Shop #, Market, City"
+                    value={storeData.address}
+                    onChange={(e) => setStoreData({ ...storeData, address: e.target.value })}
+                    className="h-12 rounded-xl focus:ring-2 focus:ring-primary/20 border-border"
                   />
                 </div>
               </div>
-              <div>
-                <Label>Store Address</Label>
-                <Input
-                  value={storeData.address}
-                  onChange={(e) => setStoreData({ ...storeData, address: e.target.value })}
-                  className="mt-1.5 h-11 rounded-xl focus:ring-2 focus:ring-primary"
-                />
+
+              <div className="pt-4 border-t border-border">
+                <Button onClick={handleSave} className="gradient-bg border-0 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95">
+                  Save All Changes
+                </Button>
               </div>
-              <div>
-                <Label>Store URL</Label>
-                <div className="flex gap-2 mt-1.5">
-                  <Input
-                    value={`https://prismzone.vercel.app/store/${storeData.slug}`}
-                    readOnly
-                    className="bg-muted font-mono text-xs cursor-not-allowed flex-1"
-                  />
-                  <Button variant="outline" size="sm" onClick={copyStoreUrl}>
-                    Copy
-                  </Button>
-                </div>
-              </div>
-              <Button onClick={handleSave} className="gradient-bg border-0 text-primary-foreground">Save Changes</Button>
             </div>
           </TabsContent>
 
