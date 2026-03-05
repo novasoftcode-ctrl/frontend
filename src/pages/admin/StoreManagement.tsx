@@ -1,16 +1,18 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/config/api";
-import { Store, Eye, Search, Filter, Save } from "lucide-react";
+import { Store, Eye, Search, Filter, Save, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 export default function StoreManagement() {
     const [stores, setStores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState<string | null>(null);
 
     useEffect(() => {
         fetchStores();
@@ -58,6 +60,31 @@ export default function StoreManagement() {
         }
     };
 
+    const deleteStore = async (id: string, storeName: string) => {
+        if (!window.confirm(`Are you absolutely sure you want to permanently delete the store "${storeName}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        setDeleting(id);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/stores/${id}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                toast.success(`Store "${storeName}" deleted successfully`);
+                setStores(stores.filter(store => store._id !== id));
+            } else {
+                toast.error("Failed to delete store.");
+            }
+        } catch (error) {
+            console.error("Failed to delete store:", error);
+            toast.error("Network error while deleting store.");
+        } finally {
+            setDeleting(null);
+        }
+    };
+
     const filteredStores = stores.filter(store =>
         store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         store.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -98,15 +125,17 @@ export default function StoreManagement() {
                                     <th className="text-left p-4 font-semibold">Category</th>
                                     <th className="text-center p-4 font-semibold">Total Products</th>
                                     <th className="text-center p-4 font-semibold">Total Orders</th>
+                                    <th className="text-left p-4 font-semibold">Joining Date</th>
+                                    <th className="text-center p-4 font-semibold">URL</th>
                                     <th className="text-left p-4 font-semibold">Status</th>
-                                    <th className="text-right p-4 font-semibold">Actions</th>
+                                    <th className="text-center p-4 font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
                                 {loading ? (
-                                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Loading store data...</td></tr>
+                                    <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">Loading store data...</td></tr>
                                 ) : filteredStores.length === 0 ? (
-                                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No stores found.</td></tr>
+                                    <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">No stores found.</td></tr>
                                 ) : (
                                     filteredStores.map((store) => (
                                         <tr key={store._id} className="hover:bg-muted/20 transition-colors">
@@ -117,7 +146,6 @@ export default function StoreManagement() {
                                                     </div>
                                                     <div>
                                                         <p className="font-semibold text-foreground text-base">{store.name}</p>
-                                                        <p className="text-xs text-muted-foreground">Joined: {new Date(store.joinedDate).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -132,6 +160,16 @@ export default function StoreManagement() {
                                             </td>
                                             <td className="p-4 text-center font-semibold text-lg">{store.productsCount}</td>
                                             <td className="p-4 text-center font-semibold text-primary text-lg">{store.ordersCount}</td>
+                                            <td className="p-4 text-muted-foreground font-medium text-sm whitespace-nowrap">
+                                                {new Date(store.joinedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <Button variant="link" size="sm" asChild className="text-primary h-auto p-0">
+                                                    <Link to={`/store/${store.slug || store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')}`} target="_blank">
+                                                        Visit <ExternalLink className="w-3 h-3 ml-1" />
+                                                    </Link>
+                                                </Button>
+                                            </td>
                                             <td className="p-4">
                                                 <select
                                                     className="text-xs border border-border rounded-md px-2 py-1 bg-background"
@@ -142,16 +180,27 @@ export default function StoreManagement() {
                                                     <option value="Disabled">Disabled</option>
                                                 </select>
                                             </td>
-                                            <td className="p-4 text-right">
-                                                <Button
-                                                    variant="default"
-                                                    size="sm"
-                                                    className="h-8"
-                                                    disabled={updating === store._id}
-                                                    onClick={() => updateStoreStatus(store._id, store.status)}
-                                                >
-                                                    <Save className="w-4 h-4 mr-2" /> {updating === store._id ? "Saving..." : "Update"}
-                                                </Button>
+                                            <td className="p-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Button
+                                                        variant="default"
+                                                        size="sm"
+                                                        className="h-8"
+                                                        disabled={updating === store._id}
+                                                        onClick={() => updateStoreStatus(store._id, store.status)}
+                                                    >
+                                                        <Save className="w-4 h-4 mr-2" /> {updating === store._id ? "Saving..." : "Update"}
+                                                    </Button>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        className="h-8 px-2"
+                                                        disabled={deleting === store._id}
+                                                        onClick={() => deleteStore(store._id, store.name)}
+                                                    >
+                                                        {deleting === store._id ? "..." : <Trash2 className="w-4 h-4" />}
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -161,6 +210,6 @@ export default function StoreManagement() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 }
