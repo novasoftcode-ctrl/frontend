@@ -22,7 +22,7 @@ const menuItems = [
 
 const adminMenuItems = [
   { title: "Platform Overview", url: "/admin", icon: LayoutDashboard },
-  { title: "Store Management", url: "/admin#stores", icon: Store },
+  { title: "Store Management", url: "/admin/store-management", icon: Store },
   { title: "User Control", url: "/admin#users", icon: Users },
   { title: "Revenue", url: "/admin#revenue", icon: BarChart3 },
   { title: "Platform Settings", url: "/admin#settings", icon: Settings },
