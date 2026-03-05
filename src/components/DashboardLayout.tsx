@@ -23,7 +23,7 @@ const menuItems = [
 const adminMenuItems = [
   { title: "Platform Overview", url: "/admin", icon: LayoutDashboard },
   { title: "Store Management", url: "/admin/store-management", icon: Store },
-  { title: "User Control", url: "/admin#users", icon: Users },
+  { title: "Store Control", url: "/admin/store-control", icon: Users },
   { title: "Revenue", url: "/admin#revenue", icon: BarChart3 },
   { title: "Platform Settings", url: "/admin#settings", icon: Settings },
 ];
@@ -78,7 +78,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <SidebarContent>
             <div className="p-4 flex items-center gap-3 border-b border-border/50 mb-2">
               <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 overflow-hidden">
-                {storeLogo ? (
+                {isAdmin ? (
+                  <Store className="w-6 h-6 text-primary-foreground" />
+                ) : storeLogo ? (
                   <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
                 ) : (
                   <Store className="w-6 h-6 text-primary-foreground" />
@@ -125,11 +127,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="h-16 flex items-center border-b border-border px-6 bg-white/80 backdrop-blur-md sticky top-0 z-40">
             <SidebarTrigger className="hover:bg-muted" />
             <div className="ml-auto flex items-center gap-4 relative">
-              {isAdmin && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground font-black text-[10px] tracking-tighter uppercase" asChild>
-                  <Link to="/dashboard">Vendor Dashboard</Link>
-                </Button>
-              )}
+              {/* Removed Vendor Dashboard Link for Admin */}
 
               <div
                 className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-primary-foreground text-sm font-black shadow-lg shadow-primary/20 cursor-pointer hover:rotate-3 transition-transform"

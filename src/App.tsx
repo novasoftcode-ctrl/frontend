@@ -32,6 +32,7 @@ import ExploreStores from "./pages/ExploreStores";
 import TrackOrder from "./pages/TrackOrder";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StoreManagement from "./pages/admin/StoreManagement";
+import StoreControl from "./pages/admin/StoreControl";
 import { StoreProvider } from "./contexts/StoreContext";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/stores" element={<ExploreStores />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/store-management" element={<StoreManagement />} />
+            <Route path="/admin/store-control" element={<StoreControl />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />

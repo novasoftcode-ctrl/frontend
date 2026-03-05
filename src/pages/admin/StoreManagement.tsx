@@ -1,14 +1,16 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/config/api";
-import { Store, Eye, Search, Filter } from "lucide-react";
+import { Store, Eye, Search, Filter, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function StoreManagement() {
     const [stores, setStores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [updating, setUpdating] = useState<string | null>(null);
 
     useEffect(() => {
         fetchStores();
@@ -25,6 +27,34 @@ export default function StoreManagement() {
             console.error("Failed to fetch stores:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusChange = (id: string, newStatus: string) => {
+        setStores(stores.map(store =>
+            store._id === id ? { ...store, status: newStatus } : store
+        ));
+    };
+
+    const updateStoreStatus = async (id: string, newStatus: string) => {
+        setUpdating(id);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/stores/${id}/status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (response.ok) {
+                toast.success(`Store status updated to ${newStatus}`);
+            } else {
+                toast.error("Failed to update store status.");
+            }
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            toast.error("Network error while updating status.");
+        } finally {
+            setUpdating(null);
         }
     };
 
@@ -63,19 +93,20 @@ export default function StoreManagement() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-muted/30 text-muted-foreground text-xs uppercase tracking-wider">
-                                    <th className="text-left p-4 font-semibold">Store & Owner</th>
+                                    <th className="text-left p-4 font-semibold">Store Name</th>
+                                    <th className="text-left p-4 font-semibold">Owner Info</th>
                                     <th className="text-left p-4 font-semibold">Category</th>
                                     <th className="text-center p-4 font-semibold">Total Products</th>
                                     <th className="text-center p-4 font-semibold">Total Orders</th>
-                                    <th className="text-left p-4 font-semibold">Joined Date</th>
+                                    <th className="text-left p-4 font-semibold">Status</th>
                                     <th className="text-right p-4 font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
                                 {loading ? (
-                                    <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading store data...</td></tr>
+                                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Loading store data...</td></tr>
                                 ) : filteredStores.length === 0 ? (
-                                    <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No stores found.</td></tr>
+                                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No stores found.</td></tr>
                                 ) : (
                                     filteredStores.map((store) => (
                                         <tr key={store._id} className="hover:bg-muted/20 transition-colors">
@@ -86,9 +117,13 @@ export default function StoreManagement() {
                                                     </div>
                                                     <div>
                                                         <p className="font-semibold text-foreground text-base">{store.name}</p>
-                                                        <p className="text-xs text-muted-foreground">{store.ownerName} · {store.ownerEmail}</p>
+                                                        <p className="text-xs text-muted-foreground">Joined: {new Date(store.joinedDate).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <p className="font-semibold text-sm">{store.ownerName}</p>
+                                                <p className="text-xs text-muted-foreground">{store.ownerEmail}</p>
                                             </td>
                                             <td className="p-4">
                                                 <span className="bg-muted/50 text-muted-foreground px-2.5 py-1 rounded-md text-xs font-medium">
@@ -97,10 +132,25 @@ export default function StoreManagement() {
                                             </td>
                                             <td className="p-4 text-center font-semibold text-lg">{store.productsCount}</td>
                                             <td className="p-4 text-center font-semibold text-primary text-lg">{store.ordersCount}</td>
-                                            <td className="p-4 text-muted-foreground">{new Date(store.joinedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                                            <td className="p-4">
+                                                <select
+                                                    className="text-xs border border-border rounded-md px-2 py-1 bg-background"
+                                                    value={store.status}
+                                                    onChange={(e) => handleStatusChange(store._id, e.target.value)}
+                                                >
+                                                    <option value="Active">Active</option>
+                                                    <option value="Disabled">Disabled</option>
+                                                </select>
+                                            </td>
                                             <td className="p-4 text-right">
-                                                <Button variant="outline" size="sm" className="h-8">
-                                                    <Eye className="w-4 h-4 mr-2" /> View Details
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    className="h-8"
+                                                    disabled={updating === store._id}
+                                                    onClick={() => updateStoreStatus(store._id, store.status)}
+                                                >
+                                                    <Save className="w-4 h-4 mr-2" /> {updating === store._id ? "Saving..." : "Update"}
                                                 </Button>
                                             </td>
                                         </tr>
