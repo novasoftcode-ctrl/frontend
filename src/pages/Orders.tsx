@@ -60,6 +60,14 @@ export default function Orders() {
 
       if (response.ok) {
         toast({ title: `Order ${newStatus}`, description: `Order status updated to ${newStatus}.` });
+
+        // Optimistically update the UI
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+
         fetchOrders();
       } else {
         throw new Error("Failed to update status");
