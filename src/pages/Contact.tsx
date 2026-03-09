@@ -5,8 +5,46 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useState } from "react";
+import { API_BASE_URL } from "@/config/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Contact() {
+    const { toast } = useToast();
+    const [form, setForm] = useState({ fullName: '', email: '', phone: '', subject: '', message: '' });
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!form.fullName || !form.email || !form.phone) {
+            toast({ title: 'Required Fields', description: 'Full Name, Email and Phone are required.', variant: 'destructive' });
+            return;
+        }
+        setSubmitting(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/contact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast({ title: 'Message Sent!', description: data.message });
+                setForm({ fullName: '', email: '', phone: '', subject: '', message: '' });
+            } else {
+                toast({ title: 'Error', description: data.message, variant: 'destructive' });
+            }
+        } catch {
+            toast({ title: 'Error', description: 'Failed to send message. Try again.', variant: 'destructive' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background">
             <Navbar />
@@ -30,36 +68,36 @@ export default function Contact() {
                                 </div>
                             </div>
 
-                            <form className="space-y-6">
+                            <form className="space-y-6" onSubmit={handleSubmit}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Full Name</label>
-                                        <Input placeholder="John Doe" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
+                                        <Input name="fullName" value={form.fullName} onChange={handleChange} placeholder="John Doe" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Email Address</label>
-                                        <Input placeholder="john@example.com" type="email" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
+                                        <Input name="email" value={form.email} onChange={handleChange} placeholder="john@example.com" type="email" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Phone Number</label>
-                                        <Input placeholder="+92 300 1234567" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
+                                        <Input name="phone" value={form.phone} onChange={handleChange} placeholder="+92 300 1234567" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Subject</label>
-                                        <Input placeholder="Inspiration / Support" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
+                                        <Input name="subject" value={form.subject} onChange={handleChange} placeholder="Inspiration / Support" className="bg-muted/50 border-none h-14 rounded-2xl focus-visible:ring-primary/20" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Your Message</label>
-                                    <Textarea placeholder="Tell us about your project..." className="bg-muted/50 border-none min-h-[160px] rounded-3xl resize-none focus-visible:ring-primary/20 p-6" />
+                                    <Textarea name="message" value={form.message} onChange={handleChange} placeholder="Tell us about your project..." className="bg-muted/50 border-none min-h-[160px] rounded-3xl resize-none focus-visible:ring-primary/20 p-6" />
                                 </div>
 
-                                <Button className="w-full h-14 gradient-bg border-0 text-primary-foreground font-black text-lg shadow-lg hover:shadow-primary/20 transition-all rounded-2xl">
-                                    Submit Message
+                                <Button type="submit" disabled={submitting} className="w-full h-14 gradient-bg border-0 text-primary-foreground font-black text-lg shadow-lg hover:shadow-primary/20 transition-all rounded-2xl">
+                                    {submitting ? 'Sending...' : 'Submit Message'}
                                     <Send className="w-5 h-5 ml-2" />
                                 </Button>
                             </form>

@@ -22,10 +22,11 @@ const menuItems = [
 
 const adminMenuItems = [
   { title: "Platform Overview", url: "/admin", icon: LayoutDashboard },
+  { title: "Users", url: "/admin/users", icon: Users },
   { title: "Store Management", url: "/admin/store-management", icon: Store },
   { title: "Store Control", url: "/admin/store-control", icon: Users },
   { title: "New Store", url: "/admin/new-stores", icon: BarChart3 },
-  { title: "Platform Settings", url: "/admin#settings", icon: Settings },
+  { title: "Contact Us", url: "/admin/contact-us", icon: Settings },
 ];
 
 

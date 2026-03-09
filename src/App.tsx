@@ -34,6 +34,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import StoreManagement from "./pages/admin/StoreManagement";
 import StoreControl from "./pages/admin/StoreControl";
 import NewStores from "./pages/admin/NewStores";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminContactUs from "./pages/admin/AdminContactUs";
 import { StoreProvider } from "./contexts/StoreContext";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -111,6 +113,8 @@ const App = () => (
             <Route path="/admin/store-management" element={<StoreManagement />} />
             <Route path="/admin/store-control" element={<StoreControl />} />
             <Route path="/admin/new-stores" element={<NewStores />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/contact-us" element={<AdminContactUs />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />
