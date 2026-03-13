@@ -25,7 +25,9 @@ export default function AdminUsers() {
 
     const fetchUsers = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/admin/users`);
+            const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setUsers(data);
@@ -40,7 +42,10 @@ export default function AdminUsers() {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             const data = await res.json();
             if (res.ok) {
                 toast({ title: 'Deleted', description: data.message });

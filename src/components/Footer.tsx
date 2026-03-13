@@ -1,9 +1,34 @@
 import { Link } from "react-router-dom";
-import { Store, Facebook, Twitter, Linkedin, Youtube, Mail, Phone, MapPin, ArrowUp, Send } from "lucide-react";
+import { Store, Facebook, Twitter, Linkedin, Youtube, Mail, Phone, MapPin, ArrowUp, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/config/api";
 
 export default function Footer() {
+  const [facebookUrl, setFacebookUrl] = useState("#");
+  const [instagramUrl, setInstagramUrl] = useState("#");
+  const [linkedinUrl, setLinkedinUrl] = useState("#");
+  const [contactEmail, setContactEmail] = useState("info@peima.punjab.gov.pk");
+  const [phone, setPhone] = useState("(042) 99232040");
+  const [address, setAddress] = useState("50 Babar Block Garden Town, Lahore");
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/admin/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.facebookUrl) setFacebookUrl(data.facebookUrl);
+        if (data.instagramUrl) setInstagramUrl(data.instagramUrl);
+        if (data.linkedinUrl) setLinkedinUrl(data.linkedinUrl);
+        if (data.contactEmail) setContactEmail(data.contactEmail);
+        if (data.phone) setPhone(data.phone);
+        if (data.address) setAddress(data.address);
+      })
+      .catch(() => {
+        // silently use defaults on failure
+      });
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -27,11 +52,15 @@ export default function Footer() {
               PrismZone is dedicated to promoting high-quality digital commerce by providing the tools and infrastructure for businesses to launch and scale their online presence through technical assistance and innovative storefront solutions.
             </p>
             <div className="flex gap-3">
-              {[Facebook, Twitter, Linkedin, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-[#0f2a4a] transition-all transform hover:-translate-y-1">
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-[#0f2a4a] transition-all transform hover:-translate-y-1">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-[#0f2a4a] transition-all transform hover:-translate-y-1">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-[#0f2a4a] transition-all transform hover:-translate-y-1">
+                <Linkedin className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
@@ -79,15 +108,15 @@ export default function Footer() {
             <div className="space-y-5">
               <div className="flex items-start gap-4">
                 <MapPin className="w-5 h-5 text-yellow-500 shrink-0 mt-1" />
-                <p className="text-sm font-medium text-blue-100/90">50 Babar Block Garden Town, Lahore</p>
+                <p className="text-sm font-medium text-blue-100/90">{address}</p>
               </div>
               <div className="flex items-center gap-4">
                 <Phone className="w-5 h-5 text-yellow-500 shrink-0" />
-                <p className="text-sm font-medium text-blue-100/90">(042) 99232040</p>
+                <p className="text-sm font-medium text-blue-100/90">{phone}</p>
               </div>
               <div className="flex items-center gap-4">
                 <Mail className="w-5 h-5 text-yellow-500 shrink-0" />
-                <p className="text-sm font-medium text-blue-100/90">info@peima.punjab.gov.pk</p>
+                <p className="text-sm font-medium text-blue-100/90">{contactEmail}</p>
               </div>
             </div>
 

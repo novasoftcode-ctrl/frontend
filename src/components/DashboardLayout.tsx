@@ -27,6 +27,7 @@ const adminMenuItems = [
   { title: "Store Control", url: "/admin/store-control", icon: Users },
   { title: "New Store", url: "/admin/new-stores", icon: BarChart3 },
   { title: "Contact Us", url: "/admin/contact-us", icon: Settings },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 
@@ -164,7 +165,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Link
                     to="/"
                     className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all group"
-                    onClick={() => setShowProfileMenu(false)}
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      if (isAdmin) {
+                        localStorage.removeItem("admin_token");
+                      }
+                    }}
                   >
                     <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                     Logout

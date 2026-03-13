@@ -20,7 +20,9 @@ export default function StoreManagement() {
 
     const fetchStores = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/stores`);
+            const response = await fetch(`${API_BASE_URL}/api/admin/stores`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setStores(data);
@@ -43,7 +45,10 @@ export default function StoreManagement() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/stores/${id}/status`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("admin_token")}`
+                },
                 body: JSON.stringify({ status: newStatus }),
             });
 
@@ -69,6 +74,7 @@ export default function StoreManagement() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/stores/${id}`, {
                 method: "DELETE",
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
             });
 
             if (response.ok) {

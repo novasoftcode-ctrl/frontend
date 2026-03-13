@@ -16,7 +16,9 @@ export default function NewStores() {
 
     const fetchNewStores = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/stores/recent`);
+            const response = await fetch(`${API_BASE_URL}/api/admin/stores/recent`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setStores(data);

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
@@ -36,6 +36,8 @@ import StoreControl from "./pages/admin/StoreControl";
 import NewStores from "./pages/admin/NewStores";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminContactUs from "./pages/admin/AdminContactUs";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSettings from "./pages/admin/AdminSettings";
 import { StoreProvider } from "./contexts/StoreContext";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -66,6 +68,16 @@ const ScrollToHash = () => {
 };
 
 const queryClient = new QueryClient();
+
+// Protect admin routes — redirect to login if not authenticated
+const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("admin_token");
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return <>{children}</>;
+};
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -109,12 +121,14 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/stores" element={<ExploreStores />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/store-management" element={<StoreManagement />} />
-            <Route path="/admin/store-control" element={<StoreControl />} />
-            <Route path="/admin/new-stores" element={<NewStores />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/contact-us" element={<AdminContactUs />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/store-management" element={<ProtectedAdminRoute><StoreManagement /></ProtectedAdminRoute>} />
+            <Route path="/admin/store-control" element={<ProtectedAdminRoute><StoreControl /></ProtectedAdminRoute>} />
+            <Route path="/admin/new-stores" element={<ProtectedAdminRoute><NewStores /></ProtectedAdminRoute>} />
+            <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsers /></ProtectedAdminRoute>} />
+            <Route path="/admin/contact-us" element={<ProtectedAdminRoute><AdminContactUs /></ProtectedAdminRoute>} />
+            <Route path="/admin/settings" element={<ProtectedAdminRoute><AdminSettings /></ProtectedAdminRoute>} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />

@@ -18,7 +18,9 @@ export default function StoreControl() {
 
     const fetchDueStores = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/stores/payment-due`);
+            const response = await fetch(`${API_BASE_URL}/api/admin/stores/payment-due`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setStores(data);
@@ -38,7 +40,10 @@ export default function StoreControl() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/stores/${id}/payment-reminder`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" }
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("admin_token")}`
+                }
             });
 
             if (response.ok) {

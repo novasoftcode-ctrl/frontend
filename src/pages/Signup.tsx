@@ -172,10 +172,7 @@ export default function Signup() {
               <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-slate-400 font-bold tracking-widest">or sign up with</span></div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="h-12 rounded-xl font-bold border-slate-200 hover:bg-slate-50 transition-colors">Google</Button>
-              <Button variant="outline" className="h-12 rounded-xl font-bold border-slate-200 hover:bg-slate-50 transition-colors">Facebook</Button>
-            </div>
+
 
             <p className="text-center text-sm text-slate-500 mt-8 font-medium">
               Already have an account?{" "}

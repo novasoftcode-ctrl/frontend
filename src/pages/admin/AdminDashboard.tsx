@@ -42,8 +42,12 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const statsRes = await fetch(`${API_BASE_URL}/api/admin/dashboard-stats`);
-      const storesRes = await fetch(`${API_BASE_URL}/api/admin/stores`);
+      const statsRes = await fetch(`${API_BASE_URL}/api/admin/dashboard-stats`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+      });
+      const storesRes = await fetch(`${API_BASE_URL}/api/admin/stores`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+      });
 
       if (statsRes.ok && storesRes.ok) {
         const statsData = await statsRes.json();

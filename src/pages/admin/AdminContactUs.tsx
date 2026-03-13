@@ -24,7 +24,9 @@ export default function AdminContactUs() {
 
     const fetchContacts = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/admin/contacts`);
+            const res = await fetch(`${API_BASE_URL}/api/admin/contacts`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setContacts(data);
