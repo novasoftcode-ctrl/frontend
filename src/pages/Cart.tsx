@@ -94,22 +94,31 @@ export default function Cart() {
       // Assuming all cart items are for the same store or the backend accepts it.
 
       // Submit multiple orders (one for each item) to maintain current system compatibility
-      const orderPromises = cartItems.map(item => 
-        fetch(`${API_BASE_URL}/api/orders`, {
+      const orderPromises = cartItems.map(item => {
+        // Correctly get storeId from the product item
+        const storeId = typeof item.store === 'string' ? item.store : (item.store?._id || item.storeId);
+        
+        if (!storeId) {
+          console.error(`[Cart] Missing storeId for product: ${item.name}`, item);
+        }
+
+        return fetch(`${API_BASE_URL}/api/orders`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             productId: item._id,
-            storeId: storeIdToUse || item.storeId, // Provide a storeId correctly
+            storeId: storeId,
             ...orderData,
             quantity: item.quantity || 1,
-            // Assuming price, etc are derived on backend or not required
           })
-        }).then(res => {
-          if (!res.ok) throw new Error("A product order failed");
+        }).then(async res => {
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || "A product order failed");
+          }
           return res.json();
-        })
-      );
+        });
+      });
 
       await Promise.all(orderPromises);
 

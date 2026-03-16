@@ -98,15 +98,21 @@ export default function StoreProducts() {
     e.preventDefault();
     setSubmittingOrder(true);
     try {
-      const storeDataStr = localStorage.getItem("vendor_store_data");
-      const storeData = storeDataStr ? JSON.parse(storeDataStr) : {};
+      // Correctly identify the storeId from the product itself
+      const storeId = typeof selectedProduct.store === 'string' ? selectedProduct.store : (selectedProduct.store?._id || selectedProduct.store?.id);
+
+      if (!storeId) {
+        throw new Error("Store information is missing for this product. Please refresh.");
+      }
+
+      console.log(`[Storefront] Placing order for product ${selectedProduct._id} at store ${storeId}`);
 
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: selectedProduct._id,
-          storeId: storeData._id,
+          storeId: storeId,
           ...orderData
         })
       });
@@ -116,7 +122,8 @@ export default function StoreProducts() {
         setOrderModalOpen(false);
         setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "", quantity: 1 });
       } else {
-        throw new Error("Failed to place order");
+        const err = await response.json();
+        throw new Error(err.message || "Failed to place order");
       }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

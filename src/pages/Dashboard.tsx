@@ -4,6 +4,8 @@ import { Package, ShoppingCart, DollarSign, Users, TrendingUp, TrendingDown } fr
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/config/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 const COLORS = ["hsl(217, 91%, 60%)", "hsl(263, 70%, 50%)", "hsl(38, 92%, 50%)", "hsl(160, 84%, 39%)"];
 
@@ -24,6 +26,8 @@ export default function Dashboard() {
   ]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusMap, setStatusMap] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
   useEffect(() => {
     const savedName = localStorage.getItem("vendor_store_name");
@@ -63,6 +67,39 @@ export default function Dashboard() {
       console.error("Dashboard fetch error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (orderId: string) => {
+    const newStatus = statusMap[orderId];
+    if (!newStatus) return;
+
+    try {
+      const token = localStorage.getItem("prismzone_token");
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        toast({ title: `Order ${newStatus}`, description: `Order status updated to ${newStatus}.` });
+        
+        // Optimistically update the UI
+        setRecentOrders(prevOrders => 
+          prevOrders.map(order => 
+            order._id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        fetchDashboardData();
+      } else {
+        throw new Error("Failed to update status");
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
@@ -110,18 +147,42 @@ export default function Dashboard() {
                   <th className="text-left py-3 font-medium">Product</th>
                   <th className="text-left py-3 font-medium">Amount</th>
                   <th className="text-left py-3 font-medium">Status</th>
+                  <th className="text-left py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.length === 0 ? (
-                  <tr><td colSpan={5} className="py-8 text-center text-muted-foreground font-medium">No orders yet.</td></tr>
+                  <tr><td colSpan={6} className="py-8 text-center text-muted-foreground font-medium">No orders yet.</td></tr>
                 ) : recentOrders.map((o) => (
                   <tr key={o._id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="py-3 font-medium uppercase text-[10px] tracking-widest text-primary">#{o._id.slice(-6)}</td>
                     <td className="py-3 font-bold">{o.customerName}</td>
                     <td className="py-3 text-slate-500 font-medium">{o.product?.name || "Product Deleted"}</td>
                     <td className="py-3 font-black text-primary">Rs. {o.product?.price || 0}</td>
-                    <td className="py-3"><span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColors[o.status || 'Pending']}`}>{o.status || 'Pending'}</span></td>
+                    <td className="py-3">
+                      <select
+                        className={`text-xs font-medium px-2 py-1 rounded-md border border-border focus:ring-1 focus:ring-primary outline-none ${statusColors[statusMap[o._id] || o.status || 'Pending']}`}
+                        value={statusMap[o._id] || o.status || 'Pending'}
+                        onChange={(e) => setStatusMap(prev => ({ ...prev, [o._id]: e.target.value }))}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                    <td className="py-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={() => handleStatusUpdate(o._id)}
+                        disabled={!statusMap[o._id] || statusMap[o._id] === o.status}
+                      >
+                        Update
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
