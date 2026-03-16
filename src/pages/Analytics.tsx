@@ -67,7 +67,7 @@ export default function Analytics() {
         ) : (
           <>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard title="Total Revenue" value={`Rs. ${data?.revenue || 0}`} icon={<DollarSign className="w-4 h-4" />} trend="+12.5%" />
+              <StatCard title="Total Revenue" value={`Rs. ${data?.revenue?.toLocaleString() || 0}`} icon={<DollarSign className="w-4 h-4" />} trend="+12.5%" />
               <StatCard title="Active Users" value={data?.visitors || "0"} icon={<Users className="w-4 h-4" />} trend="+3.2%" />
               <StatCard title="Total Orders" value={data?.totalOrders || "0"} icon={<ShoppingBag className="w-4 h-4" />} trend="+18.4%" />
               <StatCard title="Conversion" value="3.4%" icon={<TrendingUp className="w-4 h-4" />} trend="+0.8%" />

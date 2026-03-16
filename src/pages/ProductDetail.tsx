@@ -81,13 +81,20 @@ export default function ProductDetail() {
     e.preventDefault();
     setSubmittingOrder(true);
     try {
-      const storeData = product.store;
+      // Ensure we have a valid store ID. If product.store is an object (populated), use ._id
+      // If product.store is just an ID string, use it directly.
+      const storeId = typeof product.store === 'string' ? product.store : (product.store?._id || product.store?.id);
+
+      if (!storeId) {
+        throw new Error("Store information is missing. Please refresh and try again.");
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: product._id,
-          storeId: storeData._id,
+          storeId: storeId,
           ...orderData,
           quantity: qty
         })
@@ -98,7 +105,8 @@ export default function ProductDetail() {
         setOrderModalOpen(false);
         setOrderData({ customerName: "", customerEmail: "", customerPhone: "", customerAddress: "" });
       } else {
-        throw new Error("Failed to place order");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to place order");
       }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

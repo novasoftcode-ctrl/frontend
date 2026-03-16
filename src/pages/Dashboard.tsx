@@ -50,10 +50,14 @@ export default function Dashboard() {
         setStats([
           { title: "Total Products", value: products.length.toString(), change: "Live", icon: Package, up: true },
           { title: "Orders", value: orders.length.toString(), change: "Live", icon: ShoppingCart, up: true },
-          { title: "Revenue", value: `$${totalRevenue.toFixed(2)}`, change: "Live", icon: DollarSign, up: true },
+          { title: "Revenue", value: `Rs. ${totalRevenue.toLocaleString()}`, change: "Live", icon: DollarSign, up: true },
           { title: "Visitors", value: "0", change: "N/A", icon: Users, up: false },
         ]);
         setRecentOrders(orders.slice(0, 5));
+      } else {
+        const pErr = !prodRes.ok ? await prodRes.json() : null;
+        const oErr = !orderRes.ok ? await orderRes.json() : null;
+        console.error("Dashboard error responses:", { pErr, oErr });
       }
     } catch (error) {
       console.error("Dashboard fetch error:", error);
@@ -116,7 +120,7 @@ export default function Dashboard() {
                     <td className="py-3 font-medium uppercase text-[10px] tracking-widest text-primary">#{o._id.slice(-6)}</td>
                     <td className="py-3 font-bold">{o.customerName}</td>
                     <td className="py-3 text-slate-500 font-medium">{o.product?.name || "Product Deleted"}</td>
-                    <td className="py-3 font-black text-primary">${o.product?.price || 0}</td>
+                    <td className="py-3 font-black text-primary">Rs. {o.product?.price || 0}</td>
                     <td className="py-3"><span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColors[o.status || 'Pending']}`}>{o.status || 'Pending'}</span></td>
                   </tr>
                 ))}
