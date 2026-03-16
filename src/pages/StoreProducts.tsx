@@ -81,6 +81,19 @@ export default function StoreProducts() {
     localStorage.setItem("user_favorites", JSON.stringify(newFavs));
   };
 
+  const addToCart = (product: any) => {
+    const existingCart = JSON.parse(localStorage.getItem("user_cart") || "[]");
+    const existingProductIndex = existingCart.findIndex((p: any) => p._id === product._id);
+    if (existingProductIndex >= 0) {
+      existingCart[existingProductIndex].quantity = (existingCart[existingProductIndex].quantity || 1) + 1;
+      localStorage.setItem("user_cart", JSON.stringify(existingCart));
+    } else {
+      localStorage.setItem("user_cart", JSON.stringify([...existingCart, { ...product, quantity: 1 }]));
+    }
+    toast({ title: "Added to Cart!", description: `${product.name} has been added to your cart. 🛒` });
+    window.dispatchEvent(new Event("storage"));
+  };
+
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittingOrder(true);
@@ -203,10 +216,10 @@ export default function StoreProducts() {
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-2xl font-black text-foreground">Rs. {p.price}</span>
                         <Button
-                          onClick={() => { setSelectedProduct(p); setOrderModalOpen(true); }}
+                          onClick={() => addToCart(p)}
                           className="rounded-full px-6 font-bold gradient-bg border-0 shadow-lg shadow-primary/20"
                         >
-                          Order Now
+                          Add to Cart
                         </Button>
                       </div>
                     </div>

@@ -113,11 +113,11 @@ const App = () => (
                   <Route path="about" element={<StoreAbout />} />
                   <Route path="contact" element={<StoreContact />} />
                   <Route path="track" element={<TrackOrder />} />
+                  <Route path="cart" element={<Cart />} />
                 </Routes>
               </StoreProvider>
             } />
 
-            <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/stores" element={<ExploreStores />} />

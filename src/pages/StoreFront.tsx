@@ -95,6 +95,22 @@ export default function StoreFront() {
     localStorage.setItem("user_favorites", JSON.stringify(newFavs));
   };
 
+  const addToCart = (product: any) => {
+    const existingCart = JSON.parse(localStorage.getItem("user_cart") || "[]");
+    const existingProductIndex = existingCart.findIndex((p: any) => p._id === product._id);
+    if (existingProductIndex >= 0) {
+      existingCart[existingProductIndex].quantity = (existingCart[existingProductIndex].quantity || 1) + 1;
+      localStorage.setItem("user_cart", JSON.stringify(existingCart));
+    } else {
+      localStorage.setItem("user_cart", JSON.stringify([...existingCart, { ...product, quantity: 1 }]));
+    }
+    // Simple way to trigger a re-render in StoreLayout (if it's checking length on route changes etc, or just let users see it when they navigate).
+    // For immediate update we update the length.
+    toast({ title: "Added to Cart!", description: `${product.name} has been added to your cart. 🛒` });
+    // Force a re-render in StoreLayout by dispatching a storage event
+    window.dispatchEvent(new Event("storage"));
+  };
+
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittingOrder(true);
@@ -129,7 +145,7 @@ export default function StoreFront() {
       <section
         className={`py-24 text-center relative overflow-hidden flex items-center justify-center min-h-[500px] ${!storeCover ? 'bg-slate-950' : ''}`}
         style={storeCover ? {
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${storeCover})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${storeCover})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
@@ -236,10 +252,10 @@ export default function StoreFront() {
                       <span className="text-xl font-black text-foreground">Rs. {p.price}</span>
                       <Button
                         size="sm"
-                        onClick={() => { setSelectedProduct(p); setOrderModalOpen(true); }}
+                        onClick={() => addToCart(p)}
                         className="rounded-full px-5 gradient-bg border-0 text-primary-foreground font-black"
                       >
-                        Order Now
+                        Add to Cart
                       </Button>
                     </div>
                   </div>

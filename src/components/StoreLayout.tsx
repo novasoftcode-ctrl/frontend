@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Store, Search, Heart, Menu, X, LayoutDashboard, Compass } from "lucide-react";
+import { Store, Search, Heart, Menu, X, LayoutDashboard, Compass, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -14,6 +14,18 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+  const [favCount, setFavCount] = useState(0);
+
+  useEffect(() => {
+    const updateCounts = () => {
+      setCartCount(JSON.parse(localStorage.getItem("user_cart") || "[]").length);
+      setFavCount(JSON.parse(localStorage.getItem("user_favorites") || "[]").length);
+    };
+    updateCounts(); // Initial
+    window.addEventListener("storage", updateCounts);
+    return () => window.removeEventListener("storage", updateCounts);
+  }, []);
 
   const storeName = storeData?.name || "My Store";
   const storeLogo = storeData?.logoUrl || null;
@@ -53,7 +65,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto flex items-center justify-between h-18 px-4 py-2">
           <Link to={`/store/${slug}`} className="flex items-center gap-2.5 font-heading font-black text-xl hover:text-primary transition-colors">
-            <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden text-primary-foreground">
+            <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden text-primary-foreground">
               {storeLogo ? (
                 <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               ) : (
@@ -102,7 +114,16 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                 <Link to={`/store/${slug}/favorites`}>
                   <Heart className="w-5 h-5 group-hover:text-destructive transition-all" />
                   <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-black shadow-md border-2 border-white">
-                    {JSON.parse(localStorage.getItem("user_favorites") || "[]").length}
+                    {favCount}
+                  </span>
+                </Link>
+              </Button>
+
+              <Button variant="ghost" size="icon" className="w-11 h-11 rounded-full hover:bg-slate-100 relative group" asChild>
+                <Link to={`/store/${slug}/cart`}>
+                  <ShoppingCart className="w-5 h-5 group-hover:text-primary transition-all" />
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-black shadow-md border-2 border-white">
+                    {cartCount}
                   </span>
                 </Link>
               </Button>

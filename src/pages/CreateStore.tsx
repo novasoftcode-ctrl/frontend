@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { Store, Upload, Check, Copy, QrCode, ArrowRight, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Store, Upload, Check, Copy, QrCode, ArrowRight, ArrowLeft, Image as ImageIcon, Download } from "lucide-react";
 import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { API_BASE_URL } from "@/config/api";
@@ -432,13 +432,39 @@ export default function CreateStore() {
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="w-40 h-40 bg-white border-2 border-muted rounded-2xl mx-auto mb-8 flex items-center justify-center shadow-lg overflow-hidden">
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-40 h-40 bg-white border-2 border-muted rounded-2xl flex items-center justify-center shadow-lg overflow-hidden mb-4">
                 {(() => {
                   const slug = JSON.parse(localStorage.getItem("vendor_store_data") || "{}").slug || "my-store";
                   const storeUrl = `${window.location.origin}/store/${slug}`;
                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(storeUrl)}`;
-                  return <img src={qrUrl} alt="Store QR Code" className="w-32 h-32" />;
+                  return <img id="store-qr-code" src={qrUrl} alt="Store QR Code" className="w-32 h-32" />;
                 })()}
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={async () => {
+                    try {
+                      const img = document.getElementById('store-qr-code') as HTMLImageElement;
+                      if (!img || !img.src) return;
+                      const response = await fetch(img.src);
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.style.display = 'none';
+                      a.href = url;
+                      a.download = 'store-qr-code.png';
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                      console.error("Error downloading QR code", error);
+                    }
+                  }}
+                  className="font-bold border-primary text-primary hover:bg-primary/10"
+                >
+                  <Download className="w-4 h-4 mr-2" /> Download QR Code
+                </Button>
               </div>
               <Button className="w-full h-12 gradient-bg border-0 text-primary-foreground font-black text-lg shadow-xl hover:shadow-primary/20 transition-all" asChild>
                 <Link to="/dashboard">Go to Your Dashboard <ArrowRight className="ml-2 w-5 h-5" /></Link>

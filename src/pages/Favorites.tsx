@@ -46,6 +46,19 @@ export default function Favorites() {
         }
     };
 
+    const addToCart = (product: any) => {
+        const existingCart = JSON.parse(localStorage.getItem("user_cart") || "[]");
+        const existingProductIndex = existingCart.findIndex((p: any) => p._id === product._id);
+        if (existingProductIndex >= 0) {
+            existingCart[existingProductIndex].quantity = (existingCart[existingProductIndex].quantity || 1) + 1;
+            localStorage.setItem("user_cart", JSON.stringify(existingCart));
+        } else {
+            localStorage.setItem("user_cart", JSON.stringify([...existingCart, { ...product, quantity: 1 }]));
+        }
+        toast({ title: "Added to Cart!", description: `${product.name} has been added to your cart. 🛒` });
+        window.dispatchEvent(new Event("storage"));
+    };
+
     const removeFavorite = (productId: string) => {
         const newFavs = favorites.filter(id => id !== productId);
         setFavorites(newFavs);
@@ -99,8 +112,8 @@ export default function Favorites() {
                                     <h3 className="font-heading font-bold text-lg mb-1 truncate">{p.name}</h3>
                                     <p className="text-primary font-black text-xl mb-4">Rs. {p.price}</p>
                                     <div className="flex gap-2">
-                                        <Button className="flex-1 rounded-full font-bold gradient-bg border-0" asChild>
-                                            <Link to={`/store/${slug}/products`}>Order Now</Link>
+                                        <Button onClick={() => addToCart(p)} className="flex-1 rounded-full font-bold gradient-bg border-0">
+                                            Add to Cart
                                         </Button>
                                     </div>
                                 </div>
