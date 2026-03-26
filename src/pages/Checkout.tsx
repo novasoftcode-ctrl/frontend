@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, CreditCard, Truck, Store } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, ArrowRight, Check, CreditCard, Truck, Store, Smartphone, Building } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { API_BASE_URL } from "@/config/api";
+import { useToast } from "@/hooks/use-toast";
 
 const cartItems = [
   { name: "Classic Blue Dress", price: 89.99, qty: 1, img: "👗" },
@@ -14,7 +16,38 @@ const cartItems = [
 
 export default function Checkout() {
   const [step, setStep] = useState(1);
+  const [paymentType, setPaymentType] = useState("online"); // "online" or "cash"
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [storePaymentMethods, setStorePaymentMethods] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+
+  // Get store slug from URL or use a default
+  const getStoreSlug = () => {
+    const pathParts = window.location.pathname.split('/');
+    const storeIndex = pathParts.indexOf('store');
+    return storeIndex !== -1 && pathParts[storeIndex + 1] ? pathParts[storeIndex + 1] : 'default-store';
+  };
+
+  useEffect(() => {
+    const fetchStorePaymentMethods = async () => {
+      try {
+        const storeSlug = getStoreSlug();
+        const response = await fetch(`${API_BASE_URL}/api/store/${storeSlug}`);
+        if (response.ok) {
+          const data = await response.json();
+          setStorePaymentMethods(data.paymentMethods || {});
+        }
+      } catch (error) {
+        console.error("Error fetching store payment methods:", error);
+      }
+    };
+
+    if (step === 2) {
+      fetchStorePaymentMethods();
+    }
+  }, [step]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,22 +98,129 @@ export default function Checkout() {
               {step === 2 && (
                 <>
                   <h2 className="text-xl font-heading font-bold mb-6">Payment Method</h2>
+                  
+                  {/* Payment Type Selection */}
                   <div className="space-y-3 mb-6">
-                    {["Credit/Debit Card", "PayPal", "Bank Transfer"].map((m, i) => (
-                      <label key={m} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${i === 0 ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
-                        <input type="radio" name="payment" defaultChecked={i === 0} className="accent-primary" />
-                        <span className="text-sm font-medium">{m}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="space-y-4">
-                    <div><Label>Card Number</Label><Input placeholder="4242 4242 4242 4242" className="mt-1.5" /></div>
+                    <Label className="text-sm font-medium">Choose Payment Type</Label>
                     <div className="grid grid-cols-2 gap-4">
-                      <div><Label>Expiry</Label><Input placeholder="MM/YY" className="mt-1.5" /></div>
-                      <div><Label>CVV</Label><Input placeholder="123" className="mt-1.5" /></div>
+                      <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${paymentType === "online" ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
+                        <input type="radio" name="paymentType" value="online" checked={paymentType === "online"} onChange={(e) => setPaymentType(e.target.value)} className="accent-primary" />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">Online Payment</span>
+                          <span className="text-xs text-muted-foreground">Pay via EasyPaisa, JazzCash</span>
+                        </div>
+                        <CreditCard className="w-5 h-5 text-primary" />
+                      </label>
+                      <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${paymentType === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
+                        <input type="radio" name="paymentType" value="cash" checked={paymentType === "cash"} onChange={(e) => setPaymentType(e.target.value)} className="accent-primary" />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">Cash on Delivery</span>
+                          <span className="text-xs text-muted-foreground">Pay when you receive</span>
+                        </div>
+                        <Truck className="w-5 h-5 text-primary" />
+                      </label>
                     </div>
-                    <div><Label>Name on Card</Label><Input className="mt-1.5" /></div>
                   </div>
+
+                  {/* Online Payment Methods */}
+                  {paymentType === "online" && (
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium">Select Online Payment Method</Label>
+                      {storePaymentMethods ? (
+                        <div className="space-y-3">
+                          {storePaymentMethods.easypaisa?.enabled && (
+                            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPaymentMethod === "easypaisa" ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
+                              <input type="radio" name="paymentMethod" value="easypaisa" checked={selectedPaymentMethod === "easypaisa"} onChange={(e) => setSelectedPaymentMethod(e.target.value)} className="accent-primary" />
+                              <div className="flex items-center gap-3 flex-1">
+                                <Smartphone className="w-5 h-5 text-green-600" />
+                                <div>
+                                  <span className="text-sm font-medium">EasyPaisa</span>
+                                  <p className="text-xs text-muted-foreground">Pay with EasyPaisa account</p>
+                                </div>
+                              </div>
+                            </label>
+                          )}
+                          {storePaymentMethods.jazzcash?.enabled && (
+                            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPaymentMethod === "jazzcash" ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
+                              <input type="radio" name="paymentMethod" value="jazzcash" checked={selectedPaymentMethod === "jazzcash"} onChange={(e) => setSelectedPaymentMethod(e.target.value)} className="accent-primary" />
+                              <div className="flex items-center gap-3 flex-1">
+                                <Smartphone className="w-5 h-5 text-blue-600" />
+                                <div>
+                                  <span className="text-sm font-medium">JazzCash</span>
+                                  <p className="text-xs text-muted-foreground">Pay with JazzCash account</p>
+                                </div>
+                              </div>
+                            </label>
+                          )}
+                          {storePaymentMethods.bankTransfer?.enabled && (
+                            <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${selectedPaymentMethod === "bankTransfer" ? "border-primary bg-primary/5" : "border-border hover:border-foreground/20"}`}>
+                              <input type="radio" name="paymentMethod" value="bankTransfer" checked={selectedPaymentMethod === "bankTransfer"} onChange={(e) => setSelectedPaymentMethod(e.target.value)} className="accent-primary" />
+                              <div className="flex items-center gap-3 flex-1">
+                                <Building className="w-5 h-5 text-purple-600" />
+                                <div>
+                                  <span className="text-sm font-medium">Bank Transfer</span>
+                                  <p className="text-xs text-muted-foreground">Direct bank transfer</p>
+                                </div>
+                              </div>
+                            </label>
+                          )}
+                          {!storePaymentMethods.easypaisa?.enabled && !storePaymentMethods.jazzcash?.enabled && !storePaymentMethods.bankTransfer?.enabled && (
+                            <div className="text-center py-8 bg-muted/30 rounded-lg">
+                              <p className="text-muted-foreground">No online payment methods available</p>
+                              <p className="text-sm text-muted-foreground">Please contact the store owner</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 bg-muted/30 rounded-lg">
+                          <p className="text-muted-foreground">Loading payment methods...</p>
+                        </div>
+                      )}
+
+                      {/* Payment Details Form */}
+                      {selectedPaymentMethod && (
+                        <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+                          <Label className="text-sm font-medium">Payment Details</Label>
+                          <div>
+                            <Label className="text-xs">Account Number</Label>
+                            <Input 
+                              placeholder="Enter your account number" 
+                              className="mt-1.5"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Account Holder Name</Label>
+                            <Input 
+                              placeholder="Enter account holder name" 
+                              className="mt-1.5"
+                            />
+                          </div>
+                          {selectedPaymentMethod === "bankTransfer" && (
+                            <div>
+                              <Label className="text-xs">Transaction ID</Label>
+                              <Input 
+                                placeholder="Enter transaction ID" 
+                                className="mt-1.5"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Cash on Delivery Message */}
+                  {paymentType === "cash" && (
+                    <div className="p-4 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Truck className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium">Cash on Delivery</p>
+                          <p className="text-xs text-muted-foreground">You will pay when you receive your order</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
               {step === 3 && (

@@ -23,6 +23,12 @@ export default function DashboardSettings() {
       newCustomer: true
     }
   });
+  const [paymentMethods, setPaymentMethods] = useState({
+    easypaisa: { enabled: false, accountNumber: "", accountName: "" },
+    jazzcash: { enabled: false, accountNumber: "", accountName: "" },
+    bankTransfer: { enabled: false, accountNumber: "", accountName: "", bankName: "" }
+  });
+  const [showPaymentConfig, setShowPaymentConfig] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStoreData();
@@ -45,6 +51,18 @@ export default function DashboardSettings() {
           slug: data.slug || "",
           notifications: data.notifications || { newOrder: true, lowStock: true, newCustomer: true }
         });
+        // Fetch payment methods configuration
+        const paymentResponse = await fetch(`${API_BASE_URL}/api/store/payment-methods`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (paymentResponse.ok) {
+          const paymentData = await paymentResponse.json();
+          setPaymentMethods(paymentData.paymentMethods || {
+            easypaisa: { enabled: false, accountNumber: "", accountName: "" },
+            jazzcash: { enabled: false, accountNumber: "", accountName: "" },
+            bankTransfer: { enabled: false, accountNumber: "", accountName: "", bankName: "" }
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching store settings:", error);
@@ -67,7 +85,8 @@ export default function DashboardSettings() {
           address: storeData.address,
           phone: storeData.phone,
           email: storeData.email,
-          notifications: storeData.notifications
+          notifications: storeData.notifications,
+          paymentMethods: paymentMethods
         })
       });
 
@@ -89,6 +108,41 @@ export default function DashboardSettings() {
         });
       } else {
         throw new Error(result.message || "Failed to update settings");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePaymentConfigSave = async (method: string) => {
+    try {
+      const token = localStorage.getItem("prismzone_token");
+      const response = await fetch(`${API_BASE_URL}/api/store/payment-methods`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          paymentMethods: {
+            ...paymentMethods,
+            [method]: paymentMethods[method as keyof typeof paymentMethods]
+          }
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Payment Method Updated",
+          description: `${method.charAt(0).toUpperCase() + method.slice(1)} configuration saved successfully.`,
+        });
+        setShowPaymentConfig(null);
+      } else {
+        throw new Error("Failed to update payment method");
       }
     } catch (error: any) {
       toast({
@@ -210,10 +264,117 @@ export default function DashboardSettings() {
               <h3 className="font-heading font-semibold mb-4">Payment Methods</h3>
               <p className="text-muted-foreground text-sm">Configure payment gateways for your store.</p>
               <div className="mt-4 space-y-3">
-                {["Credit/Debit Cards", "PayPal", "Bank Transfer"].map((m) => (
-                  <div key={m} className="flex items-center justify-between p-4 rounded-lg border border-border">
-                    <span className="font-medium text-sm">{m}</span>
-                    <Button variant="outline" size="sm">Configure</Button>
+                {[
+                  { key: "easypaisa", name: "EasyPaisa", icon: "📱" },
+                  { key: "jazzcash", name: "JazzCash", icon: "📱" },
+                  { key: "bankTransfer", name: "Bank Transfer", icon: "🏦" }
+                ].map((method) => (
+                  <div key={method.key} className="border border-border rounded-lg">
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{method.icon}</span>
+                        <span className="font-medium text-sm">{method.name}</span>
+                        {(paymentMethods[method.key as keyof typeof paymentMethods] as any)?.enabled && (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Enabled</span>
+                        )}
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowPaymentConfig(showPaymentConfig === method.key ? null : method.key)}
+                      >
+                        {showPaymentConfig === method.key ? "Cancel" : "Configure"}
+                      </Button>
+                    </div>
+                    
+                    {showPaymentConfig === method.key && (
+                      <div className="border-t border-border p-4 bg-muted/30">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={(paymentMethods[method.key as keyof typeof paymentMethods] as any)?.enabled || false}
+                              onChange={(e) => setPaymentMethods({
+                                ...paymentMethods,
+                                [method.key]: {
+                                  ...paymentMethods[method.key as keyof typeof paymentMethods],
+                                  enabled: e.target.checked
+                                }
+                              })}
+                              className="rounded border-border"
+                            />
+                            <label className="text-sm font-medium">Enable {method.name}</label>
+                          </div>
+                          
+                          {(paymentMethods[method.key as keyof typeof paymentMethods] as any)?.enabled && (
+                            <>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-xs font-bold uppercase tracking-wider">Account Name</Label>
+                                  <Input
+                                    placeholder="Account holder name"
+                                    value={(paymentMethods[method.key as keyof typeof paymentMethods] as any)?.accountName || ""}
+                                    onChange={(e) => setPaymentMethods({
+                                      ...paymentMethods,
+                                      [method.key]: {
+                                        ...paymentMethods[method.key as keyof typeof paymentMethods],
+                                        accountName: e.target.value
+                                      }
+                                    })}
+                                    className="mt-1.5"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs font-bold uppercase tracking-wider">Account Number</Label>
+                                  <Input
+                                    placeholder="Account number"
+                                    value={(paymentMethods[method.key as keyof typeof paymentMethods] as any)?.accountNumber || ""}
+                                    onChange={(e) => setPaymentMethods({
+                                      ...paymentMethods,
+                                      [method.key]: {
+                                        ...paymentMethods[method.key as keyof typeof paymentMethods],
+                                        accountNumber: e.target.value
+                                      }
+                                    })}
+                                    className="mt-1.5"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {method.key === "bankTransfer" && (
+                                <div>
+                                  <Label className="text-xs font-bold uppercase tracking-wider">Bank Name</Label>
+                                  <Input
+                                    placeholder="Bank name"
+                                    value={(paymentMethods.bankTransfer as any)?.bankName || ""}
+                                    onChange={(e) => setPaymentMethods({
+                                      ...paymentMethods,
+                                      bankTransfer: {
+                                        ...paymentMethods.bankTransfer,
+                                        bankName: e.target.value
+                                      }
+                                    })}
+                                    className="mt-1.5"
+                                  />
+                                </div>
+                              )}
+                              
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => handlePaymentConfigSave(method.key)}
+                                  className="gradient-bg border-0 text-primary-foreground"
+                                >
+                                  Save Configuration
+                                </Button>
+                                <Button variant="outline" onClick={() => setShowPaymentConfig(null)}>
+                                  Cancel
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
