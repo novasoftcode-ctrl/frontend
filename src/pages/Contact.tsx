@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/config/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +13,24 @@ export default function Contact() {
     const { toast } = useToast();
     const [form, setForm] = useState({ fullName: '', email: '', phone: '', subject: '', message: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [contactInfo, setContactInfo] = useState({
+        address: "50 Babar Block Garden Town, Lahore",
+        phone: "(042) 99232040",
+        contactEmail: "info@peima.punjab.gov.pk"
+    });
+
+    useEffect(() => {
+        fetch(`${API_BASE_URL}/api/admin/settings`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.address) setContactInfo(prev => ({ ...prev, address: data.address }));
+                if (data.phone) setContactInfo(prev => ({ ...prev, phone: data.phone }));
+                if (data.contactEmail) setContactInfo(prev => ({ ...prev, contactEmail: data.contactEmail }));
+            })
+            .catch(() => {
+                // silently use defaults on failure
+            });
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -120,19 +138,19 @@ export default function Contact() {
                                     {
                                         icon: MapPin,
                                         title: "Office Address",
-                                        content: "50 Babar Block Garden Town, Lahore",
+                                        content: contactInfo.address,
                                         color: "gradient-bg"
                                     },
                                     {
                                         icon: Phone,
                                         title: "Phone Number",
-                                        content: "(042) 99232040",
+                                        content: contactInfo.phone,
                                         color: "gradient-bg"
                                     },
                                     {
                                         icon: Mail,
                                         title: "Email Addresses",
-                                        content: "info@peima.punjab.gov.pk",
+                                        content: contactInfo.contactEmail,
                                         color: "gradient-bg"
                                     }
                                 ].map((item, i) => (
